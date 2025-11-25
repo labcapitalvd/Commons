@@ -1,4 +1,3 @@
-from typing import TYPE_CHECKING
 from datetime import datetime
 from decimal import Decimal
 
@@ -12,9 +11,6 @@ from shared_db import (
     column_integer,
     column_short_text,
 )
-
-if TYPE_CHECKING:
-    from shared_models.auth.users import User
 
 
 class UserTier(Base):

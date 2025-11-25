@@ -1,7 +1,6 @@
-from enum import Enum
+from shared_db import BaseTargetTable
 
-
-class TargetTable(Enum):
+class TargetTable(BaseTargetTable):
     LOG_ACTION_TYPES = ("log_action_types", "reference")
     FILE_TYPES = ("file_types", "reference")
     ROLES = ("roles", "reference")
@@ -19,11 +18,3 @@ class TargetTable(Enum):
     NOTIFICATION_TYPES = ("notification_types", "reference")
     COMMENTS = ("comments", "interactions")
     NOTIFICATIONS = ("notifications", "interactions")
-
-    def __init__(self, table_name: str, schema: str):
-        self.table = table_name
-        self.schema = schema
-
-    @property
-    def fq_name(self) -> str:
-        return f"{self.schema}.{self.table}"

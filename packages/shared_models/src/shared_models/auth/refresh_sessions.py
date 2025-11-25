@@ -1,4 +1,3 @@
-from typing import TYPE_CHECKING
 from datetime import datetime
 from uuid import UUID
 
@@ -14,9 +13,6 @@ from shared_db import (
     column_datetime,
     column_uuid
 )
-
-if TYPE_CHECKING:
-    from shared_models.auth.users import User
 
 
 class RefreshSession(Base):

@@ -1,4 +1,3 @@
-from typing import TYPE_CHECKING
 from uuid import UUID
 from datetime import datetime
 
@@ -14,10 +13,6 @@ from shared_db import (
     column_short_text,
     column_bool,
 )
-
-if TYPE_CHECKING:
-    from shared_models.auth.users import User
-    from shared_models.reference.notification_types import NotificationType
 
 
 class Notification(Base):

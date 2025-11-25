@@ -1,6 +1,7 @@
 from uuid import UUID, uuid7
-from sqlalchemy.orm import DeclarativeBase
+from enum import Enum
 
+from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import UUID as UUIDType
 
@@ -10,3 +11,21 @@ class Base(DeclarativeBase):
         primary_key=True,
         default=uuid7,
     )
+
+class BaseTargetTable(Enum):
+    def __init__(self, table_name: str, schema: str):
+        self.table = table_name
+        self.schema = schema
+
+    @property
+    def fq_name(self) -> str:
+        return f"{self.schema}.{self.table}"
+
+def merge_enums(name, *enums) -> Enum:
+    members = {}
+    for enum in enums:
+        for item in enum:
+            if item.name in members:
+                raise ValueError(f"Duplicate enum member: {item.name}")
+            members[item.name] = item.value
+    return Enum(name, members, type=BaseTargetTable)

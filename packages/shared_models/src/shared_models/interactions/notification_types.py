@@ -1,13 +1,8 @@
-from typing import TYPE_CHECKING
-
 from sqlalchemy.orm import Mapped, relationship
 
 from shared_db import Base, column_long_text, column_short_text
 
 from shared_models.targets import TargetTable
-
-if TYPE_CHECKING:
-    from shared_models.interactions.notifications import Notification
 
 
 class NotificationType(Base):

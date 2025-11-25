@@ -1,4 +1,3 @@
-from typing import TYPE_CHECKING
 from decimal import Decimal
 
 from sqlalchemy.orm import Mapped, relationship
@@ -6,11 +5,6 @@ from sqlalchemy.orm import Mapped, relationship
 from shared_db import Base, column_short_text, column_decimal
 
 from shared_models.targets import TargetTable
-
-if TYPE_CHECKING:
-    from shared_models.files.files import File
-
-MAX_FILE_SIZE = 1024 * 1024 * 1024  # 1GB
 
 
 class FileType(Base):

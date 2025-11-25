@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional
+from typing import Optional
 from datetime import datetime
 from uuid import UUID
 
@@ -12,10 +12,6 @@ from shared_db import (
     column_updated_at,
     column_fk,
 )
-
-if TYPE_CHECKING:
-    from shared_models.auth.users import User
-    from shared_models.files.files import File
 
 
 class UserProfile(Base):

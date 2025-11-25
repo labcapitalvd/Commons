@@ -1,4 +1,3 @@
-from typing import TYPE_CHECKING
 from uuid import UUID
 from datetime import datetime
 from decimal import Decimal
@@ -15,13 +14,6 @@ from shared_db import (
     column_fk,
     column_decimal,
 )
-
-if TYPE_CHECKING:
-    from shared_models.auth.user_profiles import UserProfile
-    from shared_models.links.link_user_file import UserFileLink
-    from shared_models.reference.file_types import FileType
-
-MAX_FILE_SIZE = 1024 * 1024 * 1024  # 1GB
 
 
 class File(Base):

@@ -1,10 +1,11 @@
-from typing import TYPE_CHECKING
 from uuid import UUID
 from datetime import datetime
 
 from sqlalchemy.orm import Mapped, relationship
 
+
 from shared_models.targets import TargetTable
+
 
 from shared_db import (
     Base,
@@ -15,10 +16,6 @@ from shared_db import (
     column_uuid,
     column_short_text,
 )
-
-if TYPE_CHECKING:
-    from shared_models.auth.users import User
-    from shared_models.reference.comment_types import CommentType
 
 
 class Comment(Base):

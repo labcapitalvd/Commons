@@ -1,15 +1,8 @@
-from typing import TYPE_CHECKING
-
 from sqlalchemy.orm import Mapped, relationship
 
 from shared_db import Base, column_long_text, column_short_text
 
 from shared_models.targets import TargetTable
-
-if TYPE_CHECKING:
-    from shared_models.links.link_user_actor import UserActorLink
-    from shared_models.links.link_user_submission import UserSubmissionLink
-    from shared_models.links.link_user_file import UserFileLink
 
 
 class Role(Base):

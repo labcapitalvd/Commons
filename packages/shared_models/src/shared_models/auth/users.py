@@ -1,4 +1,3 @@
-from typing import TYPE_CHECKING
 from datetime import datetime
 from decimal import Decimal
 from uuid import UUID
@@ -15,17 +14,6 @@ from shared_db import (
     column_bool,
     column_fk,
 )
-
-if TYPE_CHECKING:
-    from shared_models.reference.user_tiers import UserTier
-    from shared_models.auth.user_profiles import UserProfile
-    from shared_models.auth.user_details import UserDetails
-    from shared_models.interactions.notifications import Notification
-    from shared_models.interactions.comments import Comment
-    from shared_models.links.link_user_actor import UserActorLink
-    from shared_models.links.link_user_submission import UserSubmissionLink
-    from shared_models.links.link_user_file import UserFileLink
-    from shared_models.auth.refresh_sessions import RefreshSession
 
 
 class User(Base):

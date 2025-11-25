@@ -1,4 +1,3 @@
-from typing import TYPE_CHECKING
 from datetime import datetime
 
 from uuid import UUID
@@ -15,9 +14,6 @@ from shared_db import (
     column_fk,
     column_uuid,
 )
-
-if TYPE_CHECKING:
-    from shared_models.reference.log_action_types import LogActionType
 
 
 class ActivityLog(Base):

@@ -1,4 +1,3 @@
-from typing import TYPE_CHECKING
 from uuid import UUID
 from datetime import datetime
 
@@ -7,11 +6,6 @@ from sqlalchemy.orm import Mapped, relationship
 from shared_models.targets import TargetTable
 
 from shared_db import Base, column_fk, column_updated_at
-
-if TYPE_CHECKING:
-    from shared_models.auth.users import User
-    from shared_models.files.files import File
-    from shared_models.reference.roles import Role
 
 
 class UserFileLink(Base):
