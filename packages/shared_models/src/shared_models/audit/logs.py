@@ -1,0 +1,41 @@
+from typing import TYPE_CHECKING
+from datetime import datetime
+
+from uuid import UUID
+
+from sqlalchemy.orm import Mapped, relationship
+
+from shared_models.targets import TargetTable
+
+from shared_db import (
+    Base,
+    column_enum,
+    column_long_text,
+    column_updated_at,
+    column_fk,
+    column_uuid,
+)
+
+if TYPE_CHECKING:
+    from shared_models.reference.log_action_types import LogActionType
+
+
+class ActivityLog(Base):
+    __tablename__ = TargetTable.LOGS.table
+    __table_args__ = {"schema": TargetTable.LOGS.schema}
+
+    user_id: Mapped[UUID] = column_fk(target=f"{TargetTable.USERS.fq_name}.id")
+    log_action_type_id: Mapped[UUID] = column_fk(
+        target=f"{TargetTable.LOG_ACTION_TYPES.fq_name}.id"
+    )
+
+    target: Mapped[TargetTable] = column_enum(TargetTable)
+    target_id: Mapped[UUID] = column_uuid()
+
+    description: Mapped[str] = column_long_text(nullable=True)
+
+    timestamp: Mapped[datetime] = column_updated_at()
+
+    type: Mapped["LogActionType"] = relationship(
+        "LogActionType", back_populates="log", uselist=False
+    )

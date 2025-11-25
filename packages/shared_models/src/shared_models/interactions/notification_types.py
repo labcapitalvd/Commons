@@ -1,0 +1,22 @@
+from typing import TYPE_CHECKING
+
+from sqlalchemy.orm import Mapped, relationship
+
+from shared_db import Base, column_long_text, column_short_text
+
+from shared_models.targets import TargetTable
+
+if TYPE_CHECKING:
+    from shared_models.interactions.notifications import Notification
+
+
+class NotificationType(Base):
+    __tablename__ = TargetTable.NOTIFICATION_TYPES.table
+    __table_args__ = {"schema": TargetTable.NOTIFICATION_TYPES.schema}
+
+    label: Mapped[str] = column_short_text(length=255)
+    description: Mapped[str] = column_long_text()
+
+    notification: Mapped["Notification"] = relationship(
+        "Notification", back_populates="type", uselist=False
+    )
