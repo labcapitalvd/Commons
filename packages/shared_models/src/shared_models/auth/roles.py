@@ -12,12 +12,6 @@ class Role(Base):
     label: Mapped[str] = column_short_text(length=255)
     description: Mapped[str] = column_long_text()
 
-    user_actor_link: Mapped["UserActorLink"] = relationship(
-        "UserActorLink", back_populates="roles"
-    )
-    user_submission_link: Mapped["UserSubmissionLink"] = relationship(
-        "UserSubmissionLink", back_populates="roles"
-    )
     user_file_link: Mapped["UserFileLink"] = relationship(
         "UserFileLink", back_populates="roles"
     )

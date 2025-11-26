@@ -24,7 +24,6 @@ class UserDetails(Base):
     email_pro: Mapped[str] = column_short_text(length=255, unique=True, nullable=False)
     job_title: Mapped[str] = column_short_text(length=255, nullable=True)
     area: Mapped[str] = column_short_text(length=255, nullable=True)
-
     
     updated_at: Mapped[datetime] = column_updated_at()
 

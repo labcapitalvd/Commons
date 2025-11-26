@@ -29,7 +29,6 @@ class UserProfile(Base):
     )
 
     biography: Mapped[Optional[str]] = column_long_text(nullable=True)
-
     
     updated_at: Mapped[datetime] = column_updated_at()
 

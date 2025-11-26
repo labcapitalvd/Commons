@@ -49,12 +49,6 @@ class User(Base):
     )
     comments: Mapped["Comment"] = relationship("Comment", back_populates="user")
 
-    actor_links: Mapped["UserActorLink"] = relationship(
-        "UserActorLink", back_populates="user"
-    )
-    submission_links: Mapped["UserSubmissionLink"] = relationship(
-        "UserSubmissionLink", back_populates="user"
-    )
     file_links: Mapped["UserFileLink"] = relationship(
         "UserFileLink", back_populates="user"
     )

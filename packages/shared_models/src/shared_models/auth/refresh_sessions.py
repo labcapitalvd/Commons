@@ -23,7 +23,6 @@ class RefreshSession(Base):
 
     jti: Mapped[UUID] = column_uuid()
     refresh_hash: Mapped[str] = column_short_text()
-
     
     expires_at: Mapped[datetime] = column_datetime()
     revoked: Mapped[bool] = column_bool()
