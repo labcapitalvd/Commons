@@ -3,10 +3,6 @@ from datetime import datetime
 
 from sqlalchemy.orm import Mapped, relationship
 
-
-from shared_models.targets import TargetTable
-
-
 from shared_db import (
     Base,
     column_enum,
@@ -16,6 +12,9 @@ from shared_db import (
     column_uuid,
     column_short_text,
 )
+
+from ..targets import TargetTable
+from .. import User, CommentType
 
 
 class Comment(Base):

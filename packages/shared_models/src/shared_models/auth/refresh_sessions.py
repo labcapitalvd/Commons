@@ -3,8 +3,6 @@ from uuid import UUID
 
 from sqlalchemy.orm import Mapped, relationship
 
-from shared_models.targets import TargetTable
-
 from shared_db import (
     Base,
     column_short_text,
@@ -13,6 +11,9 @@ from shared_db import (
     column_datetime,
     column_uuid
 )
+
+from ..targets import TargetTable
+from .. import User
 
 
 class RefreshSession(Base):

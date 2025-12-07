@@ -2,7 +2,8 @@ from sqlalchemy.orm import Mapped, relationship
 
 from shared_db import Base, column_long_text, column_short_text
 
-from shared_models.targets import TargetTable
+from ..targets import TargetTable
+from .. import UserFileLink
 
 
 class Role(Base):

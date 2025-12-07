@@ -4,15 +4,24 @@ from uuid import UUID
 
 from sqlalchemy.orm import Mapped, relationship
 
-from shared_models.targets import TargetTable
-
 from shared_db import (
     Base,
+    column_bool,
     column_decimal,
+    column_fk,
     column_short_text,
     column_updated_at,
-    column_bool,
-    column_fk,
+)
+
+from ..targets import TargetTable
+from .. import (
+    Comment,
+    Notification,
+    RefreshSession,
+    UserDetails,
+    UserFileLink,
+    UserProfile,
+    UserTier,
 )
 
 
@@ -28,7 +37,6 @@ class User(Base):
     is_active: Mapped[bool] = column_bool(default=False)
     is_verified: Mapped[bool] = column_bool(default=False)
 
-    
     updated_at: Mapped[datetime] = column_updated_at()
 
     media_usage: Mapped[Decimal] = column_decimal(

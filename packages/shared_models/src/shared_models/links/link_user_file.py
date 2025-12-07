@@ -3,9 +3,10 @@ from datetime import datetime
 
 from sqlalchemy.orm import Mapped, relationship
 
-from shared_models.targets import TargetTable
-
 from shared_db import Base, column_fk, column_updated_at
+
+from ..targets import TargetTable
+from .. import User, File, Role
 
 
 class UserFileLink(Base):

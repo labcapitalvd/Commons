@@ -4,7 +4,8 @@ from sqlalchemy.orm import Mapped, relationship
 
 from shared_db import Base, column_short_text, column_decimal
 
-from shared_models.targets import TargetTable
+from ..targets import TargetTable
+from .. import File
 
 
 class FileType(Base):

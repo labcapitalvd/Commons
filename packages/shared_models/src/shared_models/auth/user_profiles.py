@@ -4,14 +4,15 @@ from uuid import UUID
 
 from sqlalchemy.orm import Mapped, relationship
 
-from shared_models.targets import TargetTable
-
 from shared_db import (
     Base,
     column_long_text,
     column_updated_at,
     column_fk,
 )
+
+from ..targets import TargetTable
+from .. import User, File
 
 
 class UserProfile(Base):

@@ -2,8 +2,8 @@ from sqlalchemy.orm import Mapped, relationship
 
 from shared_db import Base, column_long_text,column_short_text
 
-from shared_models.targets import TargetTable
-
+from ..targets import TargetTable
+from .. import ActivityLog
 
 class LogActionType(Base):
     __tablename__ = TargetTable.LOG_ACTION_TYPES.table

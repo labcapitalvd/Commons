@@ -5,8 +5,6 @@ from decimal import Decimal
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String
 
-from shared_models.targets import TargetTable
-
 from shared_db import (
     Base,
     column_short_text,
@@ -14,6 +12,9 @@ from shared_db import (
     column_fk,
     column_decimal,
 )
+
+from ..targets import TargetTable
+from .. import UserProfile, UserFileLink, FileType
 
 
 class File(Base):

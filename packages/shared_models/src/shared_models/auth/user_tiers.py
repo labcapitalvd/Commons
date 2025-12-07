@@ -2,7 +2,6 @@ from datetime import datetime
 from decimal import Decimal
 
 from sqlalchemy.orm import Mapped, relationship
-from shared_models.targets import TargetTable
 
 from shared_db import (
     Base,
@@ -11,6 +10,9 @@ from shared_db import (
     column_integer,
     column_short_text,
 )
+
+from ..targets import TargetTable
+from .. import User
 
 
 class UserTier(Base):

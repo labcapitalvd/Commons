@@ -3,8 +3,6 @@ from datetime import datetime
 
 from sqlalchemy.orm import Mapped, relationship
 
-from shared_models.targets import TargetTable
-
 from shared_db import (
     Base,
     column_long_text,
@@ -13,6 +11,9 @@ from shared_db import (
     column_short_text,
     column_bool,
 )
+
+from ..targets import TargetTable
+from .. import User, NotificationType
 
 
 class Notification(Base):
