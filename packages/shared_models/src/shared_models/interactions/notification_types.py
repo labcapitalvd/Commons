@@ -1,9 +1,8 @@
-from sqlalchemy.orm import Mapped, relationship
+from sqlalchemy.orm import Mapped
 
 from shared_db import Base, column_long_text, column_short_text
 
 from ..targets import TargetTable
-from .. import Notification
 
 
 class NotificationType(Base):
@@ -12,7 +11,3 @@ class NotificationType(Base):
 
     label: Mapped[str] = column_short_text(length=255)
     description: Mapped[str] = column_long_text()
-
-    notification: Mapped["Notification"] = relationship(
-        "Notification", back_populates="type", uselist=False
-    )

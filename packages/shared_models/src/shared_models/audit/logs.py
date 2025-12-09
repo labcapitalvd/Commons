@@ -1,8 +1,7 @@
 from datetime import datetime
-
 from uuid import UUID
 
-from sqlalchemy.orm import Mapped, relationship
+from sqlalchemy.orm import Mapped
 
 from shared_db import (
     Base,
@@ -14,7 +13,6 @@ from shared_db import (
 )
 
 from ..targets import TargetTable
-from .. import LogActionType
 
 
 class ActivityLog(Base):
@@ -32,7 +30,3 @@ class ActivityLog(Base):
     description: Mapped[str] = column_long_text(nullable=True)
 
     timestamp: Mapped[datetime] = column_updated_at()
-
-    type: Mapped["LogActionType"] = relationship(
-        "LogActionType", back_populates="log", uselist=False
-    )

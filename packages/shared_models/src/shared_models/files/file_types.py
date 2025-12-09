@@ -1,11 +1,10 @@
 from decimal import Decimal
 
-from sqlalchemy.orm import Mapped, relationship
+from sqlalchemy.orm import Mapped
 
 from shared_db import Base, column_short_text, column_decimal
 
 from ..targets import TargetTable
-from .. import File
 
 
 class FileType(Base):
@@ -17,5 +16,3 @@ class FileType(Base):
     extension: Mapped[str] = column_short_text(length=255)
     category: Mapped[str] = column_short_text(length=255)
     max_size: Mapped[Decimal] = column_decimal(precision=15, scale=0)
-
-    file: Mapped["File"] = relationship("File", back_populates="type", uselist=False)

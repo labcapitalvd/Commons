@@ -1,7 +1,7 @@
 from uuid import UUID
 from datetime import datetime
 
-from sqlalchemy.orm import Mapped, relationship
+from sqlalchemy.orm import Mapped
 
 from shared_db import (
     Base,
@@ -13,7 +13,6 @@ from shared_db import (
 )
 
 from ..targets import TargetTable
-from .. import User, NotificationType
 
 
 class Notification(Base):
@@ -34,8 +33,3 @@ class Notification(Base):
 
     
     updated_at: Mapped[datetime] = column_updated_at()
-
-    user: Mapped["User"] = relationship("User", back_populates="notifications")
-    type: Mapped["NotificationType"] = relationship(
-        "NotificationType", back_populates="notification", uselist=False
-    )

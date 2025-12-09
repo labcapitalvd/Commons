@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy.orm import Mapped, relationship
+from sqlalchemy.orm import Mapped
 
 from shared_db import (
     Base,
@@ -13,7 +13,6 @@ from shared_db import (
 )
 
 from ..targets import TargetTable
-from .. import User
 
 
 class RefreshSession(Base):
@@ -27,5 +26,3 @@ class RefreshSession(Base):
     
     expires_at: Mapped[datetime] = column_datetime()
     revoked: Mapped[bool] = column_bool()
-
-    user: Mapped["User"] = relationship("User", back_populates="refresh_sessions")

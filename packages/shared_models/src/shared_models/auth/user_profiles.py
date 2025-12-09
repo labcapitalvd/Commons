@@ -2,7 +2,7 @@ from typing import Optional
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy.orm import Mapped, relationship
+from sqlalchemy.orm import Mapped
 
 from shared_db import (
     Base,
@@ -12,7 +12,6 @@ from shared_db import (
 )
 
 from ..targets import TargetTable
-from .. import User, File
 
 
 class UserProfile(Base):
@@ -32,6 +31,3 @@ class UserProfile(Base):
     biography: Mapped[Optional[str]] = column_long_text(nullable=True)
     
     updated_at: Mapped[datetime] = column_updated_at()
-
-    user: Mapped["User"] = relationship("User", back_populates="profile", uselist=False)
-    file: Mapped["File"] = relationship("File", back_populates="profile", uselist=False)

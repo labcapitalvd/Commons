@@ -1,7 +1,7 @@
 from uuid import UUID
 from datetime import datetime
 
-from sqlalchemy.orm import Mapped, relationship
+from sqlalchemy.orm import Mapped
 
 from shared_db import (
     Base,
@@ -14,7 +14,6 @@ from shared_db import (
 )
 
 from ..targets import TargetTable
-from .. import User, CommentType
 
 
 class Comment(Base):
@@ -34,8 +33,3 @@ class Comment(Base):
 
     
     updated_at: Mapped[datetime] = column_updated_at()
-
-    user: Mapped["User"] = relationship("User", back_populates="comments")
-    type: Mapped["CommentType"] = relationship(
-        "CommentType", back_populates="comment", uselist=False
-    )

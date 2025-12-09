@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy.orm import Mapped, relationship
+from sqlalchemy.orm import Mapped
 
 from shared_db import (
     Base,
@@ -11,7 +11,6 @@ from shared_db import (
 )
 
 from ..targets import TargetTable
-from .. import User
 
 
 class UserDetails(Base):
@@ -27,5 +26,3 @@ class UserDetails(Base):
     area: Mapped[str] = column_short_text(length=255, nullable=True)
     
     updated_at: Mapped[datetime] = column_updated_at()
-
-    user: Mapped["User"] = relationship("User", back_populates="details", uselist=False)

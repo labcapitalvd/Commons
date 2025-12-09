@@ -14,7 +14,6 @@ from shared_db import (
 )
 
 from ..targets import TargetTable
-from .. import UserProfile, UserFileLink, FileType
 
 
 class File(Base):
@@ -37,13 +36,3 @@ class File(Base):
 
     
     updated_at: Mapped[datetime] = column_updated_at()
-
-    profile: Mapped["UserProfile"] = relationship(
-        "UserProfile", back_populates="file", uselist=False
-    )
-    user_links: Mapped["UserFileLink"] = relationship(
-        "UserFileLink", back_populates="file"
-    )
-    type: Mapped["FileType"] = relationship(
-        "FileType", back_populates="file", uselist=False
-    )

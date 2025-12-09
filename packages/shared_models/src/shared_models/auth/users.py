@@ -2,7 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 from uuid import UUID
 
-from sqlalchemy.orm import Mapped, relationship
+from sqlalchemy.orm import Mapped
 
 from shared_db import (
     Base,
@@ -14,15 +14,6 @@ from shared_db import (
 )
 
 from ..targets import TargetTable
-from .. import (
-    Comment,
-    Notification,
-    RefreshSession,
-    UserDetails,
-    UserFileLink,
-    UserProfile,
-    UserTier,
-)
 
 
 class User(Base):
@@ -41,25 +32,4 @@ class User(Base):
 
     media_usage: Mapped[Decimal] = column_decimal(
         precision=15, scale=0, default=Decimal(0)
-    )
-
-    profile: Mapped["UserProfile"] = relationship(
-        "UserProfile", back_populates="user", uselist=False
-    )
-    details: Mapped["UserDetails"] = relationship(
-        "UserDetails", back_populates="user", uselist=False
-    )
-    tier: Mapped["UserTier"] = relationship(
-        "UserTier", back_populates="user", uselist=False
-    )
-    notifications: Mapped["Notification"] = relationship(
-        "Notification", back_populates="user"
-    )
-    comments: Mapped["Comment"] = relationship("Comment", back_populates="user")
-
-    file_links: Mapped["UserFileLink"] = relationship(
-        "UserFileLink", back_populates="user"
-    )
-    refresh_sessions: Mapped["RefreshSession"] = relationship(
-        "RefreshSession", back_populates="user"
     )
