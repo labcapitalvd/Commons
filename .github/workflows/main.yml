@@ -26,6 +26,5 @@ jobs:
             shared_models.zip
             shared_schemas.zip
             shared_utils.zip
-            packages/shared_utils/fetcher.sh
         env:
           GITHUB_TOKEN: ${{ secrets.GH_RELEASE_PAT }}
