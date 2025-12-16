@@ -1,5 +1,5 @@
 import os
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Dict, Type
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -34,6 +34,41 @@ SessionAsync = async_sessionmaker(
     autoflush=False,
 )
 
-async def get_db() -> AsyncGenerator[AsyncSession, None]:
+async def get_session() -> AsyncGenerator[AsyncSession, None]:
     async with SessionAsync() as session:
         yield session
+
+
+class UnitOfWork:
+    """
+    Generic async Unit of Work.
+    Can attach any repositories dynamically.
+    """
+
+    def __init__(self, session_factory=SessionAsync):
+        self._session_factory = session_factory
+        self.session: AsyncSession | None = None
+        self.repos: Dict[str, object] = {}
+
+    async def __aenter__(self):
+        # create a session
+        self.session = self._session_factory()
+        # repos can be attached later
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        assert self.session is not None
+        if exc_type:
+            await self.session.rollback()
+        else:
+            await self.session.commit()
+        await self.session.close()
+
+    def attach_repo(self, name: str, repo_class: Type):
+        """
+        Attach a repository to this UoW dynamically.
+        repo_class must accept session as first argument.
+        """
+        if not self.session:
+            raise RuntimeError("UnitOfWork session not initialized yet")
+        self.repos[name] = repo_class(self.session)

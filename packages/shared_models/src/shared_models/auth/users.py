@@ -1,3 +1,4 @@
+from typing import TYPE_CHECKING
 from datetime import datetime
 from decimal import Decimal
 from uuid import UUID
@@ -14,6 +15,7 @@ from shared_db import (
 )
 
 from ..targets import TargetTable
+from .users import Role
 
 
 class User(Base):
@@ -33,3 +35,6 @@ class User(Base):
     media_usage: Mapped[Decimal] = column_decimal(
         precision=15, scale=0, default=Decimal(0)
     )
+    
+    if TYPE_CHECKING:
+        roles: Mapped[list["Role"]]  # many-to-many, type hint only

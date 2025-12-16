@@ -23,7 +23,7 @@ from .db_engine import (
     async_engine,
     SessionSync,
     SessionAsync,
-    get_db,
+    get_session,
     SYNC_DB,
     ASYNC_DB,
     
@@ -54,7 +54,7 @@ __all__ = [
     "async_engine",
     "SessionSync",
     "SessionAsync",
-    "get_db",
+    "get_session",
     "SYNC_DB",
     "ASYNC_DB",
 ]
