@@ -13,10 +13,10 @@ jobs:
 
       - name: Zip shared directories
         run: |
-          (cd packages/shared_db && zip -r ../../shared_db.zip .)
-          (cd packages/shared_models && zip -r ../../shared_models.zip .)
-          (cd packages/shared_schemas && zip -r ../../shared_schemas.zip .)
-          (cd packages/shared_utils && zip -r ../../shared_utils.zip .)
+          (cd Packages/shared_db && zip -r ../../shared_db.zip .)
+          (cd Packages/shared_models && zip -r ../../shared_models.zip .)
+          (cd Packages/shared_schemas && zip -r ../../shared_schemas.zip .)
+          (cd Packages/shared_utils && zip -r ../../shared_utils.zip .)
 
       - name: Upload release assets
         uses: softprops/action-gh-release@v1

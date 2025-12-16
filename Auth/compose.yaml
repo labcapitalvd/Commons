@@ -1,0 +1,12 @@
+services:
+  api_auth:
+    image: labcapital/apps:Auth
+    build:
+      context: .
+      dockerfile: Dockerfile
+      secrets:
+        - github_token
+
+secrets:
+  github_token:
+    file: ../Secrets/github_token
