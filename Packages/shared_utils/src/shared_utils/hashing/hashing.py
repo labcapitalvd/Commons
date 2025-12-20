@@ -20,9 +20,9 @@ class HashUtils:
     def verify_hash(password: str, hashed_password: str) -> bool:
         """Verifies a hashed password"""
         if not password or password.strip() == "":
-            raise EmptyHashTarget("Cannot encrypt empty string")
+            raise EmptyHashTarget("Cannot decrypt empty string")
         if not hashed_password or hashed_password.strip() == "":
-            raise EmptyHashTarget("Cannot encrypt empty string")
+            raise EmptyHashTarget("Cannot decrypt empty string")
         try:
             return pwd_context.verify(password, hashed_password)
         except Exception as e:

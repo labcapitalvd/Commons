@@ -51,24 +51,15 @@ class UnitOfWork:
         self.repos: Dict[str, object] = {}
 
     async def __aenter__(self):
-        # create a session
         self.session = self._session_factory()
-        # repos can be attached later
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         assert self.session is not None
+
         if exc_type:
             await self.session.rollback()
         else:
             await self.session.commit()
-        await self.session.close()
 
-    def attach_repo(self, name: str, repo_class: Type):
-        """
-        Attach a repository to this UoW dynamically.
-        repo_class must accept session as first argument.
-        """
-        if not self.session:
-            raise RuntimeError("UnitOfWork session not initialized yet")
-        self.repos[name] = repo_class(self.session)
+        await self.session.close()

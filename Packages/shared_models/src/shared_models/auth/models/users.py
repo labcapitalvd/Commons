@@ -35,6 +35,3 @@ class User(Base):
     media_usage: Mapped[Decimal] = column_decimal(
         precision=15, scale=0, default=Decimal(0)
     )
-    
-    if TYPE_CHECKING:
-        roles: Mapped[list["Role"]]  # many-to-many, type hint only

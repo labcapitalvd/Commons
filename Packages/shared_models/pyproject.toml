@@ -1,7 +1,7 @@
 [project]
 name = "shared_models"
 version = "0.1.0"
-description = "package para configurar los shared_models."
+description = "package para configurar el shared_models."
 requires-python = ">=3.14"
 dependencies = [
     "sqlalchemy>=2.0.44",

@@ -6,6 +6,9 @@ from ..targets import TargetTable
 
 
 class Role(Base):
+    """
+    name: canonical role code (matches RoleCode enum)
+    """
     __tablename__ = TargetTable.ROLES.table
     __table_args__ = {"schema": TargetTable.ROLES.schema}
 

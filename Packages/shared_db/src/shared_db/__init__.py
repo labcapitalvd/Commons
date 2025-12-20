@@ -26,7 +26,7 @@ from .db_engine import (
     get_session,
     SYNC_DB,
     ASYNC_DB,
-    
+    UnitOfWork
 )
 
 __all__ = [
@@ -57,4 +57,5 @@ __all__ = [
     "get_session",
     "SYNC_DB",
     "ASYNC_DB",
+    "UnitOfWork"
 ]
