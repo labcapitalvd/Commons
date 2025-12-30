@@ -1,4 +1,4 @@
-from pydantic import Field, EmailStr, SecretStr, field_validator
+from pydantic import EmailStr, SecretStr, field_validator
 
 from shared_utils import TextUtils
 from shared_schemas import (

@@ -1,5 +1,5 @@
 import os
-from typing import AsyncGenerator, Dict, Type
+from typing import AsyncGenerator, Dict, Callable
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -45,7 +45,7 @@ class UnitOfWork:
     Can attach any repositories dynamically.
     """
 
-    def __init__(self, session_factory=SessionAsync):
+    def __init__(self, session_factory: Callable[[], AsyncSession] = SessionAsync,):
         self._session_factory = session_factory
         self.session: AsyncSession | None = None
         self.repos: Dict[str, object] = {}

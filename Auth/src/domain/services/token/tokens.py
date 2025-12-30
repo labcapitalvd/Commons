@@ -1,34 +1,39 @@
-import os
-import logging
+
 from uuid import UUID
 from datetime import datetime, timezone
 
-
-from shared_utils import HashUtils
+from shared_utils import get_logger, HashUtils
 from shared_models import RefreshSession
-
 from shared_utils import TokenIssuer, TokenVerifier
 
 from infrastructure.uow import AuthUnitOfWork
 
-
-DUMMY_HASH = HashUtils.hash_string("this-value-does-not-matter")
-
-LOGLEVEL = os.environ["LOGLEVEL"].lower() in (
-    "debug",
-    "info",
-    "warning",
-    "error",
-    "critical",
-)
-
-logger = logging.getLogger("api/main")
-logger.setLevel(LOGLEVEL)
+from .errors import TokenRevoked, TokenInvalid
 
 
-class TokenService:    
+logger = get_logger("api/main")
+
+
+class TokenCrypto:
     @staticmethod
+    def hash_refresh_token(raw: str) -> str:
+        try:
+            return HashUtils.hash_token(raw)
+        except Exception as e:
+            raise RuntimeError("Failed to hash refresh token") from e
+
+    @staticmethod
+    def verify_refresh_token(raw: str, hashed: str) -> bool:
+        try:
+            return HashUtils.verify_token(raw, hashed)
+        except Exception:
+            return False
+
+
+class TokenService:
+    @classmethod
     async def issue_tokens(
+        cls,
         user_id: UUID, 
         username: str, 
         uow: AuthUnitOfWork
@@ -39,19 +44,23 @@ class TokenService:
         
         if jti is None:
             raise ValueError("Refresh token must have a jti")
+            
+        refresh_hash = TokenCrypto.hash_refresh_token(refresh_token)
         
         db_token = RefreshSession(
-            jti = jti,
-            user_id = user_id,
-            refresh_hash = HashUtils.hash_string(refresh_token),
-            expires_at=datetime.fromtimestamp(expr, tz=timezone.utc)
+            jti=jti,
+            user_id=user_id,
+            refresh_hash=refresh_hash,
+            expires_at=datetime.fromtimestamp(expr, tz=timezone.utc),
         )
+
         
-        await uow.tokens.create_refresh_token(db_token)
+        uow.tokens.create_refresh_token(db_token)
         return access_token, refresh_token
 
-    @staticmethod
+    @classmethod
     async def reauth(
+        cls,
         old_refresh_token: str,
         uow: AuthUnitOfWork
     ) -> tuple[str, str]:
@@ -59,27 +68,49 @@ class TokenService:
             
         dec = TokenVerifier.decode_token(old_refresh_token, "refresh")
         decoded = dec.claims
-        
-        user_id = UUID(decoded["sub"])
-        username = decoded["username"]
         jti = decoded["jti"]
         
         old_token = await uow.tokens.get_refresh_token_by_jti(jti)
-        if old_token:
-            await uow.tokens.delete_refresh_token(old_token)
+        if not old_token:
+            raise TokenRevoked()
+        
+        if not TokenCrypto.verify_refresh_token(
+            old_refresh_token,
+            old_token.refresh_hash
+        ):
+            raise TokenInvalid()
 
-        return await self.issue_tokens(user_id, username, uow=uow)
+        
+        uow.tokens.delete_refresh_token(old_token)
+        
+        return await cls.issue_tokens(
+            UUID(decoded["sub"]),
+            decoded["username"],
+            uow=uow
+        )
 
-    @staticmethod
+    @classmethod
     async def logout(
+        cls,
         refresh_token: str,
         uow: AuthUnitOfWork
     ) -> None:
         """Invalidate refresh token only."""
+
         dec = TokenVerifier.decode_token(refresh_token, "refresh")
         decoded = dec.claims
+        
         jti = decoded["jti"]
         
         old_token = await uow.tokens.get_refresh_token_by_jti(jti)
-        if old_token:
-            await uow.tokens.delete_refresh_token(old_token)
+        if not old_token:
+            raise TokenRevoked()
+        
+        if not TokenCrypto.verify_refresh_token(
+            refresh_token,
+            old_token.refresh_hash
+        ):
+            raise TokenInvalid()
+
+        
+        uow.tokens.delete_refresh_token(old_token)

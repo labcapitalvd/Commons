@@ -1,22 +1,13 @@
-import logging
-import os
 from typing import Optional
-from uuid import UUID
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from shared_models import Role, User
+from shared_utils import get_logger
+from shared_models import Role
 
-LOGLEVEL = os.environ["LOGLEVEL"].lower() in (
-    "debug",
-    "info",
-    "warning",
-    "error",
-    "critical",
-)
 
-logger = logging.getLogger("api/db")
-logger.setLevel(LOGLEVEL)
+logger = get_logger("api/db")
 
 
 class RoleRepository:
@@ -24,12 +15,12 @@ class RoleRepository:
         self.session = session
 
     async def get_by_name(self, name: str) -> Optional[Role]:
-        stmt = select(Role).where(Role.name == name)
+        stmt = select(Role).where(Role.label == name)
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
     async def get_default(self) -> Role:
         role = await self.get_by_name("user")
         if not role:
-            raise ConfigurationError("Default role not found")
+            raise ValueError("Default role not found")
         return role

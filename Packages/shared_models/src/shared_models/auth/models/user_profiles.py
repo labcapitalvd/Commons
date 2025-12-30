@@ -11,7 +11,7 @@ from shared_db import (
     column_fk,
 )
 
-from ..targets import TargetTable
+from ...targets import TargetTable
 
 
 class UserProfile(Base):

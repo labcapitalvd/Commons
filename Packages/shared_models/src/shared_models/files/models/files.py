@@ -2,7 +2,7 @@ from uuid import UUID
 from datetime import datetime
 from decimal import Decimal
 
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import String
 
 from shared_db import (
@@ -13,7 +13,7 @@ from shared_db import (
     column_decimal,
 )
 
-from ..targets import TargetTable
+from ...targets import TargetTable
 
 
 class File(Base):

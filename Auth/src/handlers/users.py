@@ -1,27 +1,16 @@
-import os
-import logging
-from uuid import UUID
 from typing import Optional
+from uuid import UUID
 
 from pydantic import EmailStr, SecretStr
-
+from shared_models import User
+from shared_utils import get_logger, HashUtils, TextUtils
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.users import UsersDb
 
-from shared_models import User
-from shared_utils import HashUtils, TextUtils
 
-LOGLEVEL = os.environ["LOGLEVEL"].lower() in (
-    "debug",
-    "info",
-    "warning",
-    "error",
-    "critical",
-)
+logger = get_logger("seed/users")
 
-logger = logging.getLogger("seed/users")
-logger.setLevel(LOGLEVEL)
 
 class UserHandler:
     def __init__(self, db: AsyncSession):
@@ -39,7 +28,7 @@ class UserHandler:
 
         except Exception as e:
             logger.error(f"Getting user failed on handler: {e}")
-            raise 
+            raise
 
     async def register_user(
         self, username_api: str, email_api: EmailStr, password_api: SecretStr
@@ -57,7 +46,7 @@ class UserHandler:
 
         except Exception as e:
             logging.error(f"Registration failed on handler: {str(e)}")
-            raise 
+            raise
 
     async def login_user(
         self, username_api: str, password_api: SecretStr
@@ -77,7 +66,7 @@ class UserHandler:
             return None
         except Exception as e:
             logging.error(f"Login failed on handler: {str(e)}")
-            raise 
+            raise
 
     async def delete_user(
         self, username_api: str, email_api: EmailStr, password_api: SecretStr
@@ -92,7 +81,7 @@ class UserHandler:
             )
         except Exception as e:
             logging.error(f"Delete failed on handler: {str(e)}")
-            raise 
+            raise
 
     async def update_username(self, current_user: UUID, username_api: str) -> bool:
         try:
@@ -104,7 +93,7 @@ class UserHandler:
             return True
         except Exception as e:
             logging.error(f"Update failed on username update: {str(e)}")
-            raise 
+            raise
 
     async def update_email(self, current_user: UUID, email_api: EmailStr) -> bool:
         try:
@@ -114,7 +103,7 @@ class UserHandler:
             return True
         except Exception as e:
             logging.error(f"Update failed on email update: {str(e)}")
-            raise 
+            raise
 
     async def update_password(
         self, current_user: UUID, password_api: SecretStr
@@ -128,4 +117,4 @@ class UserHandler:
             return True
         except Exception as e:
             logging.error(f"Update failed on password update: {str(e)}")
-            raise 
+            raise

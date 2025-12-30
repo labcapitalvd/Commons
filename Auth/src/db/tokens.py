@@ -1,27 +1,14 @@
-import os
-import logging
-from uuid import UUID
-from typing import Optional
 from datetime import datetime, timezone
+from typing import Optional
+from uuid import UUID
 
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.exc import IntegrityError
-
-from shared_utils import HashUtils, TokenVerifier
 from shared_models import RefreshSession
+from shared_utils import get_logger, HashUtils, TokenVerifier
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
 
-
-LOGLEVEL = os.environ["LOGLEVEL"].lower() in (
-    "debug",
-    "info",
-    "warning",
-    "error",
-    "critical",
-)
-
-logger = logging.getLogger("api/tokens")
-logger.setLevel(LOGLEVEL)
+logger = get_logger("api/tokens")
 
 
 class TokenDb:
@@ -62,7 +49,7 @@ class TokenDb:
         try:
             dec = TokenVerifier.decode_token(refresh_token, "refresh")
             decoded = dec.claims
-            
+
             jti = decoded["jti"]
             user_id = UUID(decoded["sub"])
             expires_at = datetime.fromtimestamp(decoded["exp"], tz=timezone.utc)
@@ -96,7 +83,7 @@ class TokenDb:
         try:
             dec = TokenVerifier.decode_token(token, "refresh")
             decoded = dec.claims
-            
+
             jti = decoded.get("jti")
 
             if not jti:

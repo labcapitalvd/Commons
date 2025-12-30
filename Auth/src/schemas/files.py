@@ -1,7 +1,6 @@
 from typing import Annotated
 from annotated_types import Len
 from pydantic import Field
-from fastapi import UploadFile
 
 from shared_schemas import UuidSchema
 

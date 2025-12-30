@@ -1,26 +1,13 @@
-import os
-import logging
-from uuid import UUID
 from typing import Optional
-
-from sqlalchemy import select, or_
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.exc import IntegrityError
+from uuid import UUID
 
 from shared_models import User, UserTier
-from shared_utils import HashUtils
+from shared_utils import get_logger, HashUtils
+from sqlalchemy import or_, select
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
 
-
-LOGLEVEL = os.environ["LOGLEVEL"].lower() in (
-    "debug",
-    "info",
-    "warning",
-    "error",
-    "critical",
-)
-
-logger = logging.getLogger("api/db")
-logger.setLevel(LOGLEVEL)
+logger = get_logger("api/db")
 
 
 class UsersDb:

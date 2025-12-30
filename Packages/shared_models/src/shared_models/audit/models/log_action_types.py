@@ -2,7 +2,7 @@ from sqlalchemy.orm import Mapped
 
 from shared_db import Base, column_long_text,column_short_text
 
-from ..targets import TargetTable
+from ...targets import TargetTable
 
 class LogActionType(Base):
     __tablename__ = TargetTable.LOG_ACTION_TYPES.table

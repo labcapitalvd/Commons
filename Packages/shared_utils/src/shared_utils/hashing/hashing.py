@@ -1,29 +1,52 @@
 from passlib.context import CryptContext
 
-from shared_utils.hashing.errors import HashError, EmptyHashTarget
+from .contexts import fast_context, token_context, password_context
+from .errors import HashError, EmptyHashTarget
 
-
-pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 class HashUtils:
     @staticmethod
-    def hash_string(password: str) -> str:
-        """Hashes a password using bcrypt"""
-        if not password or password.strip() == "":
-            raise EmptyHashTarget("Cannot encrypt empty string")
+    def _hash(ctx: CryptContext, value: str) -> str:
+        if not value or value.strip() == "":
+            raise EmptyHashTarget("Cannot hash empty string")
         try:
-            return pwd_context.hash(password)
+            return ctx.hash(value)
         except Exception as e:
             raise HashError(e)
 
     @staticmethod
-    def verify_hash(password: str, hashed_password: str) -> bool:
-        """Verifies a hashed password"""
-        if not password or password.strip() == "":
-            raise EmptyHashTarget("Cannot decrypt empty string")
-        if not hashed_password or hashed_password.strip() == "":
-            raise EmptyHashTarget("Cannot decrypt empty string")
+    def _verify(ctx: CryptContext, value: str, hashed: str) -> bool:
+        if not value or value.strip() == "":
+            raise EmptyHashTarget("Cannot verify empty string")
+        if not hashed or hashed.strip() == "":
+            raise EmptyHashTarget("Cannot verify empty string")
         try:
-            return pwd_context.verify(password, hashed_password)
+            return ctx.verify(value, hashed)
         except Exception as e:
             raise HashError(e)
+
+    # ---- public API ----
+
+    @classmethod
+    def hash_password(cls, password: str) -> str:
+        return cls._hash(password_context, password)
+
+    @classmethod
+    def verify_password(cls, password: str, hashed: str) -> bool:
+        return cls._verify(password_context, password, hashed)
+
+    @classmethod
+    def hash_token(cls, token: str) -> str:
+        return cls._hash(token_context, token)
+
+    @classmethod
+    def verify_token(cls, token: str, hashed: str) -> bool:
+        return cls._verify(token_context, token, hashed)
+
+    @classmethod
+    def hash_fast(cls, secret: str) -> str:
+        return cls._hash(fast_context, secret)
+
+    @classmethod
+    def verify_fast(cls, secret: str, hashed: str) -> bool:
+        return cls._verify(fast_context, secret, hashed)

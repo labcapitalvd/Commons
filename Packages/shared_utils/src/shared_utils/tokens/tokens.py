@@ -1,11 +1,9 @@
 import os
-import logging
-from typing import Optional
-
 from datetime import datetime, timedelta, timezone
+from typing import Literal, Optional
 from uuid import UUID, uuid7
-from typing import Literal
 
+from fastapi.security import OAuth2PasswordBearer
 from joserfc import jwt
 from joserfc.errors import (
     BadSignatureError,
@@ -18,15 +16,6 @@ from joserfc.errors import (
     JoseError,
 )
 
-from fastapi.security import OAuth2PasswordBearer
-
-from .errors import (
-    TokenDecodeError,
-    TokenEncodeError,
-    TokenExpiredError,
-    TokenTypeError,
-)
-
 from .config import (
     JWT_ASYMETRIC_ALGORITHM,
     JWT_EXPIRE_MINUTES_ACCESS,
@@ -35,48 +24,34 @@ from .config import (
     PUBLIC_KEY,
     REGISTRY,
 )
-
-LOGLEVEL = os.environ["LOGLEVEL"].lower() in (
-    "debug",
-    "info",
-    "warning",
-    "error",
-    "critical",
+from .errors import (
+    TokenDecodeError,
+    TokenEncodeError,
+    TokenExpiredError,
+    TokenTypeError,
 )
 
-logger = logging.getLogger("seed/users")
-logger.setLevel(LOGLEVEL)
-
-TokenType = Literal["access", "refresh"]
+from shared_utils import get_logger
 
 
 PRODUCTION_MODE = os.environ["PRODUCTION_MODE"].lower() in ("1", "true", "yes")
 COOKIES_SECURE = False if not PRODUCTION_MODE else True
-LOGLEVEL = os.environ["LOGLEVEL"].lower() in (
-    "debug",
-    "info",
-    "warning",
-    "error",
-    "critical",
-)
+
 
 COOKIES_SAMESITE: Literal["lax", "strict", "none"] = (
     "strict" if PRODUCTION_MODE and COOKIES_SECURE else "lax"
 )
 
-logger = logging.getLogger("api/main")
-logger.setLevel(LOGLEVEL)
+logger = get_logger("shared_utils/tokens")
 
-
+TokenType = Literal["access", "refresh"]
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/public/api/login")
 
 
 class TokenIssuer:
     @staticmethod
     def generate_token(
-        user_id: UUID, 
-        username: str, 
-        token_type: str = "access"
+        user_id: UUID, username: str, token_type: TokenType = "access"
     ) -> tuple[str, int, Optional[str]]:
         """
         Generate either an access or refresh token.
@@ -106,7 +81,7 @@ class TokenIssuer:
             if token_type == "refresh":
                 jti = str(uuid7())
                 claims["jti"] = jti  # must be added BEFORE encoding
-    
+
             token = jwt.encode(header, claims, PRIVATE_KEY, registry=REGISTRY)
             return token, int(exp.timestamp()), jti
 
@@ -149,9 +124,7 @@ class TokenVerifier:
             )
 
         except ExpiredTokenError:
-            raise TokenExpiredError(
-                f"{expected_type.capitalize()} token expired"
-            )
+            raise TokenExpiredError(f"{expected_type.capitalize()} token expired")
 
         except ExceededSizeError:
             raise TokenDecodeError(
@@ -165,7 +138,6 @@ class TokenVerifier:
 
         except JoseError as e:
             raise TokenDecodeError(f"Error decoding {expected_type} token: {str(e)}")
-
 
 
 class TokenContext:
@@ -231,15 +203,13 @@ class TokenContext:
         """Unified return logic."""
         if self.platform == "web":
             self.set_refresh_cookie(refresh_token)
-            return ResponseWeb(
-                access_token=access_token
-            )
+            return ResponseWeb(access_token=access_token)
         elif self.platform == "mobile":
             return ResponseMobile(
                 access_token=access_token, refresh_token=refresh_token
             )
         logger.error("Invalid platform")
-        raise 
+        raise
 
     async def get_current_user(self) -> UUID:
         """Decode access token and return user object."""
@@ -252,7 +222,8 @@ class TokenContext:
         except Exception as e:
             logger.error(f"Failed to decode token: {e}")
             raise
-    
+
+
 async def get_refresh_token(
     request: Request,
     platform: str = Header(default="web", alias="X-Platform"),

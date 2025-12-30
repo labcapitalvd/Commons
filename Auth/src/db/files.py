@@ -23,7 +23,7 @@ class FileDb:
                 select(FileType).where(FileType.label == filetypeenum.label)
             )
             return result.scalar_one()
-        except Exception as e:
+        except Exception:
             raise 
 
     async def check_duplicity(self, owner: UUID, filehash: str) -> Optional[File]:
@@ -33,7 +33,7 @@ class FileDb:
                 select(File).where(File.filehash == filehash, File.user_id == owner)
             )
             return result.scalar_one_or_none()
-        except Exception as e:
+        except Exception:
             raise 
 
     async def get_file_entry(self, id: UUID, owner: UUID) -> File:
@@ -50,7 +50,7 @@ class FileDb:
         except NoResultFound:
             raise 
 
-        except Exception as e:
+        except Exception:
             raise 
 
     async def get_all_file_entries(self, owner: UUID) -> Sequence[File]:
@@ -63,7 +63,7 @@ class FileDb:
             )
             return result.scalars().all()
 
-        except Exception as e:
+        except Exception:
             raise 
 
     async def create_file_entry(
@@ -91,7 +91,7 @@ class FileDb:
             await self.db.commit()
             await self.db.refresh(media)
             return media
-        except Exception as e:
+        except Exception:
             await self.db.rollback()
             raise 
 
@@ -130,11 +130,11 @@ class FileDb:
         except NoResultFound:
             raise 
 
-        except IntegrityError as e:
+        except IntegrityError:
             await self.db.rollback()
             raise 
 
-        except Exception as e:
+        except Exception:
             await self.db.rollback()
             raise 
 
@@ -155,10 +155,10 @@ class FileDb:
         except NoResultFound:
             raise 
 
-        except IntegrityError as e:
+        except IntegrityError:
             await self.db.rollback()
             raise 
 
-        except Exception as e:
+        except Exception:
             await self.db.rollback()
             raise 

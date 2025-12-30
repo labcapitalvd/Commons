@@ -1,5 +1,5 @@
 import os
-import logging
+
 
 from typing import Literal
 from fastapi import FastAPI
@@ -14,6 +14,7 @@ from fastapi.exceptions import RequestValidationError
 from routers.auth import router as router_auth
 from routers.files import router as router_files
 
+from shared_utils import configure_logging
 from shared_models.relationships import * 
 
 from shared_schemas import (
@@ -23,22 +24,17 @@ from shared_schemas import (
     add_routers_with_custom_errors,
 )
 
+configure_logging()
+
 VERSION = "0.1.0"
 PRODUCTION_MODE = os.environ["PRODUCTION_MODE"].lower() in ("1", "true", "yes")
 COOKIES_SECURE = False if not PRODUCTION_MODE else True
-LOGLEVEL = os.environ["LOGLEVEL"].lower() in (
-    "debug",
-    "info",
-    "warning",
-    "error",
-    "critical",
-)
+
 
 PUBLIC = os.getenv("PUBLIC_ORIGINS", "*")
 NODE = os.environ["NODE_ORIGINS"]
 
-logger = logging.getLogger("api/main")
-logger.setLevel(LOGLEVEL)
+logger = get_logger("api/main")
 
 if not PRODUCTION_MODE:
     PUBLIC_ORIGINS = ["*"]

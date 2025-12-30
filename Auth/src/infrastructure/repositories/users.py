@@ -1,22 +1,16 @@
-import logging
-import os
 from typing import Optional
 from uuid import UUID
+from typing import cast
 
-from shared_models import Role, User
 from sqlalchemy import select
+from sqlalchemy.orm import Session
 from sqlalchemy.ext.asyncio import AsyncSession
 
-LOGLEVEL = os.environ["LOGLEVEL"].lower() in (
-    "debug",
-    "info",
-    "warning",
-    "error",
-    "critical",
-)
+from shared_models import User
+from shared_utils import get_logger
 
-logger = logging.getLogger("api/db")
-logger.setLevel(LOGLEVEL)
+
+logger = get_logger("api/db")
 
 
 class UserRepository:
@@ -38,8 +32,10 @@ class UserRepository:
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def add_user(self, user: User):
-        self.session.add(user)
+    def add_user(self, user: User) -> None:
+        session = cast(Session, self.session)
+        session.add(user)
 
-    async def delete_user(self, user: User):
-        self.session.delete(user)
+    def delete_user(self, user: User) -> None:
+        session = cast(Session, self.session)
+        session.delete(user)

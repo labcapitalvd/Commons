@@ -12,7 +12,7 @@ from shared_db import (
     column_uuid,
 )
 
-from ..targets import TargetTable
+from ...targets import TargetTable
 
 
 class ActivityLog(Base):

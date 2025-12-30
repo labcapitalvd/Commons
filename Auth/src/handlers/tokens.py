@@ -1,16 +1,12 @@
 import os
-import logging
 from uuid import UUID
 
+from joserfc.jwk import OKPKey
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from joserfc import jws
-from joserfc.jwk import OKPKey
+from shared_utils import get_logger, TokenIssuer, TokenVerifier
 
 from db.tokens import TokenDb
-from utils.tokens import TokenIssuer
-
-from shared_utils.tokens import TokenIssuer, TokenVerifier
 
 
 LOGLEVEL = os.environ["LOGLEVEL"].lower() in (
@@ -26,12 +22,13 @@ JWT_EXPIRE_MINUTES_REFRESH = int(os.environ["JWT_EXPIRE_MINUTES_REFRESH"])
 
 JWT_PRIVATE_KEY_FILE = "/run/secrets/jwt_private_key"
 if not os.path.exists(JWT_PRIVATE_KEY_FILE):
-    raise FileNotFoundError(f"JWT_PRIVATE_KEY_FILE file not found at {JWT_PRIVATE_KEY_FILE}")
+    raise FileNotFoundError(
+        f"JWT_PRIVATE_KEY_FILE file not found at {JWT_PRIVATE_KEY_FILE}"
+    )
 with open(JWT_PRIVATE_KEY_FILE, "rb") as f:
     JWT_PRIVATE_KEY = OKPKey.import_key(f.read())
 
-logger = logging.getLogger("seed/users")
-logger.setLevel(LOGLEVEL)
+logger = get_logger("seed/users")
 
 
 class TokenHandler:
@@ -41,12 +38,8 @@ class TokenHandler:
 
     async def issue_tokens(self, user_id: UUID, username: str):
         """Generate access and refresh tokens"""
-        access_token = TokenIssuer.generate_token(
-            user_id, username, "access"
-        )
-        refresh_token = TokenIssuer.generate_token(
-            user_id, username, "refresh"
-        )
+        access_token = TokenIssuer.generate_token(user_id, username, "access")
+        refresh_token = TokenIssuer.generate_token(user_id, username, "refresh")
 
         await self.tokenondb.create_refresh_token_entry(refresh_token)
 
@@ -57,14 +50,14 @@ class TokenHandler:
         # Decode old refresh token
         dec = TokenVerifier.decode_token(old_refresh_token, "refresh")
         decoded = dec.claims
-        
+
         user_id = UUID(decoded["sub"])
         username = decoded["username"]
 
-        await self.tokenondb.delete_refresh_token_entry(old_refresh_token)
+        self.tokenondb.delete_refresh_token_entry(old_refresh_token)
 
         return await self.issue_tokens(user_id, username)
 
     async def logout(self, refresh_token: str) -> None:
         """Invalidate refresh token only."""
-        await self.tokenondb.delete_refresh_token_entry(refresh_token)
+        self.tokenondb.delete_refresh_token_entry(refresh_token)

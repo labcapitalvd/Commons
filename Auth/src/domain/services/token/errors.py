@@ -14,5 +14,11 @@ class UserDisabled(AuthError):
     """User exists but cannot authenticate"""
 
 
+class TokenError(AuthError):
+    """Token is no longer valid"""
+
 class TokenRevoked(AuthError):
+    """Token is no longer valid"""
+
+class TokenInvalid(AuthError):
     """Token is no longer valid"""

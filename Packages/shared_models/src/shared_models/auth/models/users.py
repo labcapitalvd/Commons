@@ -1,4 +1,3 @@
-from typing import TYPE_CHECKING
 from datetime import datetime
 from decimal import Decimal
 from uuid import UUID
@@ -14,8 +13,7 @@ from shared_db import (
     column_updated_at,
 )
 
-from ..targets import TargetTable
-from .users import Role
+from ...targets import TargetTable
 
 
 class User(Base):

@@ -13,7 +13,7 @@ from shared_db import (
     column_short_text,
 )
 
-from ..targets import TargetTable
+from ...targets import TargetTable
 
 
 class Comment(Base):

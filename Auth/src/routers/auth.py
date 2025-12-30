@@ -11,7 +11,6 @@ from application import AuthAppService
 from domain import AuthService, TokenService
 
 from schemas.auth import RequestRegister
-from schemas.auth import ResponseRegister, ResponseLogout
 
 from shared_db import get_session
 from shared_schemas import ResponseWeb, ResponseMobile, ResponseMessage
@@ -93,7 +92,7 @@ async def refresh_token(
 
 @router.post(
     "/logout",
-    response_model=ResponseLogout,
+    response_model=ResponseMessage,
     response_model_exclude_none=True,
     operation_id="logout_user",
 )
@@ -104,4 +103,4 @@ async def logout(
 ):
     """Function for logging out"""
     await AuthService(db).logout_user(refresh_token)
-    return ResponseLogout()
+    return ResponseMessage(message="ok")

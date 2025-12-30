@@ -12,7 +12,7 @@ from shared_db import (
     column_bool,
 )
 
-from ..targets import TargetTable
+from ...targets import TargetTable
 
 
 class Notification(Base):
