@@ -10,18 +10,8 @@ from shared_schemas import UuidSchema
 ##############################################################################################
 
 
-class RequestFile(UuidSchema):
-    """Request body for getting a file."""
-
-
-class RequestCreateFile:
-    """Request body for creating a file."""
-
-    file: UploadFile = Field(..., description="Archivo a subir")
-
-
 class RequestEditFile(UuidSchema):
-    """Request body for editing a file."""
+    """Schema para editar archivo basado en UUID."""
 
     filename: str = Field(
         ...,
@@ -31,20 +21,12 @@ class RequestEditFile(UuidSchema):
     )
 
 
-class RequestDeleteFile(UuidSchema):
-    """Request body for deleting a file."""
-
-
 ##############################################################################################
 # Responses
 ##############################################################################################
 
 
-class ResponseFile(UuidSchema):
-    """Modelo para representar un archivo de respuesta."""
-
-
-class ResponseFiles(ResponseFile):
+class ResponseFiles(UuidSchema):
     """Modelo para representar un listado de archivos de respuesta."""
 
     files: Annotated[list[str], Len(min_length=1, max_length=512)] = Field(

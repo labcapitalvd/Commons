@@ -12,7 +12,7 @@ from shared_utils import HashUtils
 from shared_models import User
 
 from infrastructure.uow import AuthUnitOfWork
-from errors import AuthError, InvalidCredentials, UserAlreadyExists
+from .errors import AuthError, InvalidCredentials, UserAlreadyExists
 
 
 DUMMY_HASH = HashUtils.hash_string("this-value-does-not-matter")
@@ -92,167 +92,167 @@ class AuthService:
 
 
 
-class AuthService:
-    def __init__(self, db: AsyncSession):
-        self.auth = UserHandler(db)
-        self.tokens = TokenHandler(db)
-        self.tokenchecker = TokenChecker()
+# class AuthService:
+#     def __init__(self, db: AsyncSession):
+#         self.auth = UserHandler(db)
+#         self.tokens = TokenHandler(db)
+#         self.tokenchecker = TokenChecker()
 
-    async def login_with_tokens(
-        self, username: str, password: SecretStr
-    ) -> tuple[str, str]:
-        """Login user and issue tokens."""
-        try:
-            user = await self.auth.login_user(username, password)
-            if not user:
-                logger.error(f"User error: {username}")
-                raise 
-            return await self.tokens.issue_tokens(user.id, user.username)
-        except Exception as e:
-            logger.error(f"Login error: {e}")
-            raise 
-    async def rotate_tokens(self, old_refresh_token: str) -> tuple[str, str]:
-        """Re-authenticate and issue new tokens."""
-        try:
-            dec = self.tokenchecker.decode_token(
-                old_refresh_token,
-                "refresh"
-            )
-            decoded = dec.claims
-            user_id = UUID(decoded["sub"])
+#     async def login_with_tokens(
+#         self, username: str, password: SecretStr
+#     ) -> tuple[str, str]:
+#         """Login user and issue tokens."""
+#         try:
+#             user = await self.auth.login_user(username, password)
+#             if not user:
+#                 logger.error(f"User error: {username}")
+#                 raise 
+#             return await self.tokens.issue_tokens(user.id, user.username)
+#         except Exception as e:
+#             logger.error(f"Login error: {e}")
+#             raise 
+#     async def rotate_tokens(self, old_refresh_token: str) -> tuple[str, str]:
+#         """Re-authenticate and issue new tokens."""
+#         try:
+#             dec = self.tokenchecker.decode_token(
+#                 old_refresh_token,
+#                 "refresh"
+#             )
+#             decoded = dec.claims
+#             user_id = UUID(decoded["sub"])
 
-            user = await self.auth.get_user(user_id)
-            if not user:
-                logger.error(f"User error: {user_id}")
-                raise 
-            return await self.tokens.reauth(old_refresh_token)
-        except Exception as e:
-            logger.error(f"Error rotating tokens: {e}")
-            raise
-    async def logout_user(self, refresh_token: str):
-        """Invalidate refresh token."""
-        try:
-            dec = self.tokenchecker.decode_token(
-                refresh_token,
-                "refresh"
-            )
-            decoded = dec.claims
-            user_id = UUID(decoded["sub"])
+#             user = await self.auth.get_user(user_id)
+#             if not user:
+#                 logger.error(f"User error: {user_id}")
+#                 raise 
+#             return await self.tokens.reauth(old_refresh_token)
+#         except Exception as e:
+#             logger.error(f"Error rotating tokens: {e}")
+#             raise
+#     async def logout_user(self, refresh_token: str):
+#         """Invalidate refresh token."""
+#         try:
+#             dec = self.tokenchecker.decode_token(
+#                 refresh_token,
+#                 "refresh"
+#             )
+#             decoded = dec.claims
+#             user_id = UUID(decoded["sub"])
 
-            user = await self.auth.get_user(user_id)
-            if not user:
-                logger.error(f"User error: {refresh_token}")
-                raise
-            await self.tokens.logout(refresh_token)
-        except Exception as e:
-            logger.error(f"Error logging out user: {e}")
-            raise
+#             user = await self.auth.get_user(user_id)
+#             if not user:
+#                 logger.error(f"User error: {refresh_token}")
+#                 raise
+#             await self.tokens.logout(refresh_token)
+#         except Exception as e:
+#             logger.error(f"Error logging out user: {e}")
+#             raise
             
             
-class AuthService:
+# class AuthService:
             
-    def __init__(self, db: AsyncSession):
-        self.db = db
-        self.userondb = UsersDb(self.db)
-        self.textutils = TextUtils()
+#     def __init__(self, db: AsyncSession):
+#         self.db = db
+#         self.userondb = UsersDb(self.db)
+#         self.textutils = TextUtils()
 
-    async def get_user(self, id: UUID) -> Optional[User]:
-        try:
-            dup = await self.userondb.get_user_entry(id=id)
-            if dup:
-                return dup
-            else:
-                return None
+#     async def get_user(self, id: UUID) -> Optional[User]:
+#         try:
+#             dup = await self.userondb.get_user_entry(id=id)
+#             if dup:
+#                 return dup
+#             else:
+#                 return None
 
-        except Exception as e:
-            logger.error(f"Getting user failed on handler: {e}")
-            raise 
+#         except Exception as e:
+#             logger.error(f"Getting user failed on handler: {e}")
+#             raise 
 
-    async def register_user(
-        self, username_api: str, email_api: EmailStr, password_api: SecretStr
-    ) -> Optional[User]:
-        try:
-            username = self.textutils.sanitize_text(username_api)
-            email = self.textutils.is_valid_and_safe_email(email_api)
-            password = self.textutils.sanitize_text(password_api.get_secret_value())
+#     async def register_user(
+#         self, username_api: str, email_api: EmailStr, password_api: SecretStr
+#     ) -> Optional[User]:
+#         try:
+#             username = self.textutils.sanitize_text(username_api)
+#             email = self.textutils.is_valid_and_safe_email(email_api)
+#             password = self.textutils.sanitize_text(password_api.get_secret_value())
 
-            dup = await self.userondb.get_user_entry(username=username)
-            if not dup:
-                return await self.userondb.create_user_entry(username, email, password)
+#             dup = await self.userondb.get_user_entry(username=username)
+#             if not dup:
+#                 return await self.userondb.create_user_entry(username, email, password)
 
-            return None
+#             return None
 
-        except Exception as e:
-            logging.error(f"Registration failed on handler: {str(e)}")
-            raise 
+#         except Exception as e:
+#             logging.error(f"Registration failed on handler: {str(e)}")
+#             raise 
 
-    async def login_user(
-        self, username_api: str, password_api: SecretStr
-    ) -> Optional[User]:
-        try:
-            username = self.textutils.sanitize_text(username_api)
-            password = self.textutils.sanitize_text(password_api.get_secret_value())
+#     async def login_user(
+#         self, username_api: str, password_api: SecretStr
+#     ) -> Optional[User]:
+#         try:
+#             username = self.textutils.sanitize_text(username_api)
+#             password = self.textutils.sanitize_text(password_api.get_secret_value())
 
-            user = await self.userondb.get_user_entry(username=username)
+#             user = await self.userondb.get_user_entry(username=username)
 
-            stored_hash = user.password_hash if user else "$2b$12$" + "a" * 53
-            password_matches = HashUtils.verify_hash(password, stored_hash)
+#             stored_hash = user.password_hash if user else "$2b$12$" + "a" * 53
+#             password_matches = HashUtils.verify_hash(password, stored_hash)
 
-            if user and password_matches:
-                return user
+#             if user and password_matches:
+#                 return user
 
-            return None
-        except Exception as e:
-            logging.error(f"Login failed on handler: {str(e)}")
-            raise 
+#             return None
+#         except Exception as e:
+#             logging.error(f"Login failed on handler: {str(e)}")
+#             raise 
 
-    async def delete_user(
-        self, username_api: str, email_api: EmailStr, password_api: SecretStr
-    ) -> bool:
-        try:
-            username = self.textutils.sanitize_text(username_api)
-            password = self.textutils.sanitize_text(password_api.get_secret_value())
-            email = self.textutils.is_valid_and_safe_email(email_api)
+#     async def delete_user(
+#         self, username_api: str, email_api: EmailStr, password_api: SecretStr
+#     ) -> bool:
+#         try:
+#             username = self.textutils.sanitize_text(username_api)
+#             password = self.textutils.sanitize_text(password_api.get_secret_value())
+#             email = self.textutils.is_valid_and_safe_email(email_api)
 
-            return await self.userondb.delete_user_entry(
-                username=username, email=email, passwd=password
-            )
-        except Exception as e:
-            logging.error(f"Delete failed on handler: {str(e)}")
-            raise 
+#             return await self.userondb.delete_user_entry(
+#                 username=username, email=email, passwd=password
+#             )
+#         except Exception as e:
+#             logging.error(f"Delete failed on handler: {str(e)}")
+#             raise 
 
-    async def update_username(self, current_user: UUID, username_api: str) -> bool:
-        try:
-            username = self.textutils.sanitize_text(username_api)
+#     async def update_username(self, current_user: UUID, username_api: str) -> bool:
+#         try:
+#             username = self.textutils.sanitize_text(username_api)
 
-            await self.userondb.update_user_entry(
-                id=current_user, new_username=username
-            )
-            return True
-        except Exception as e:
-            logging.error(f"Update failed on username update: {str(e)}")
-            raise 
+#             await self.userondb.update_user_entry(
+#                 id=current_user, new_username=username
+#             )
+#             return True
+#         except Exception as e:
+#             logging.error(f"Update failed on username update: {str(e)}")
+#             raise 
 
-    async def update_email(self, current_user: UUID, email_api: EmailStr) -> bool:
-        try:
-            email = self.textutils.is_valid_and_safe_email(email_api)
+#     async def update_email(self, current_user: UUID, email_api: EmailStr) -> bool:
+#         try:
+#             email = self.textutils.is_valid_and_safe_email(email_api)
 
-            await self.userondb.update_user_entry(id=current_user, new_email=email)
-            return True
-        except Exception as e:
-            logging.error(f"Update failed on email update: {str(e)}")
-            raise 
+#             await self.userondb.update_user_entry(id=current_user, new_email=email)
+#             return True
+#         except Exception as e:
+#             logging.error(f"Update failed on email update: {str(e)}")
+#             raise 
 
-    async def update_password(
-        self, current_user: UUID, password_api: SecretStr
-    ) -> bool:
-        try:
-            password = self.textutils.sanitize_text(password_api.get_secret_value())
+#     async def update_password(
+#         self, current_user: UUID, password_api: SecretStr
+#     ) -> bool:
+#         try:
+#             password = self.textutils.sanitize_text(password_api.get_secret_value())
 
-            await self.userondb.update_user_entry(
-                id=current_user, new_password=password
-            )
-            return True
-        except Exception as e:
-            logging.error(f"Update failed on password update: {str(e)}")
-            raise 
+#             await self.userondb.update_user_entry(
+#                 id=current_user, new_password=password
+#             )
+#             return True
+#         except Exception as e:
+#             logging.error(f"Update failed on password update: {str(e)}")
+#             raise 

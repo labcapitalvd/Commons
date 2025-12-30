@@ -8,8 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 
-from shared_utils import HashUtils
-from shared_utils.tokens import TokenChecker
+from shared_utils import HashUtils, TokenVerifier
 from shared_models import RefreshSession
 
 
@@ -28,7 +27,6 @@ logger.setLevel(LOGLEVEL)
 class TokenDb:
     def __init__(self, db: AsyncSession):
         self.db = db
-        self.token_checker = TokenChecker()
 
     async def get_refresh_token_entry(
         self,
@@ -36,7 +34,7 @@ class TokenDb:
     ) -> Optional[RefreshSession]:
         """Fetch a User by ID, username, or email."""
         try:
-            dec = self.token_checker.decode_token(refresh_token, "refresh")
+            dec = TokenVerifier.decode_token(refresh_token, "refresh")
             decoded = dec.claims
 
             jti = decoded.get("jti")
@@ -62,7 +60,7 @@ class TokenDb:
     ) -> Optional[RefreshSession]:
         """Create a new refresh token entry."""
         try:
-            dec = self.token_checker.decode_token(refresh_token, "refresh")
+            dec = TokenVerifier.decode_token(refresh_token, "refresh")
             decoded = dec.claims
             
             jti = decoded["jti"]
@@ -96,7 +94,7 @@ class TokenDb:
     async def delete_refresh_token_entry(self, token: str) -> bool:
         """Create a new refresh token entry."""
         try:
-            dec = self.token_checker.decode_token(token, "refresh")
+            dec = TokenVerifier.decode_token(token, "refresh")
             decoded = dec.claims
             
             jti = decoded.get("jti")

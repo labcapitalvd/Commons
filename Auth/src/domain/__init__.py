@@ -1,5 +1,6 @@
-from .services import AuthService
+from .services import AuthService, TokenService
 
 __all__ = [
     "AuthService",
+    "TokenService"
 ]

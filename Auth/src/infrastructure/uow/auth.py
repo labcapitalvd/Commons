@@ -8,8 +8,8 @@ class AuthUnitOfWork(UnitOfWork):
         await super().__aenter__()
         assert self.session is not None
 
-        self.users = UserRepository(self.session)
-        self.roles = RoleRepository(self.session)
-        self.tokens = RefreshTokenRepository(self.session)
+        self.users: UserRepository = UserRepository(self.session)
+        self.roles: RoleRepository = RoleRepository(self.session)
+        self.tokens: RefreshTokenRepository = RefreshTokenRepository(self.session)
 
         return self

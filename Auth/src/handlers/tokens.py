@@ -1,21 +1,16 @@
 import os
 import logging
-from datetime import datetime, timedelta, timezone
-from uuid import UUID, uuid7
+from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from joserfc import jwt, jws
+from joserfc import jws
 from joserfc.jwk import OKPKey
-from joserfc.errors import JoseError, InsecureClaimError
 
 from db.tokens import TokenDb
+from utils.tokens import TokenIssuer
 
-from handlers.errors import (
-    TokenEncodeError,
-)
-
-from shared_utils.tokens import TokenChecker
+from shared_utils import TokenUtils
 
 
 LOGLEVEL = os.environ["LOGLEVEL"].lower() in (
@@ -40,63 +35,18 @@ logger.setLevel(LOGLEVEL)
 
 registry = jws.JWSRegistry(algorithms=[JWT_ASYMETRIC_ALGORITHM])
 
-class TokenIssuer:
-    @staticmethod
-    def generate_token(
-        user_id: UUID, username: str, token_type: str = "access"
-    ) -> str:
-        """
-        Generate either an access or refresh token.
-        token_type: "access" | "refresh"
-        """
-        try:
-            now = datetime.now(timezone.utc)
-
-            expire_minutes = (
-                JWT_EXPIRE_MINUTES_ACCESS
-                if token_type == "access"
-                else JWT_EXPIRE_MINUTES_REFRESH
-            )
-            exp = now + timedelta(minutes=expire_minutes)
-            
-            header = {
-                "typ": "JWT",
-                "alg": "EdDSA"
-            }
-
-            claims = {
-                "sub": str(user_id),
-                "username": username,
-                "token_type": token_type,
-                "iat": int(now.timestamp()),
-                "exp": int(exp.timestamp()),
-            }
-
-            if token_type == "refresh":
-                claims["jti"] = str(uuid7())
-            return jwt.encode(header, claims, JWT_PRIVATE_KEY, registry=registry)
-        
-        except InsecureClaimError:
-            raise TokenEncodeError("Insecure claim error")
-        
-        except JoseError as e:
-            logger.error(f"Error encoding {token_type} token: {e}")
-            raise TokenEncodeError(f"Error encoding {token_type} token: {e}")
-
 
 class TokenHandler:
     def __init__(self, db: AsyncSession):
         self.db = db
         self.tokenondb = TokenDb(self.db)
-        self.token_issuer = TokenIssuer()
-        self.token_checker = TokenChecker()
 
     async def issue_tokens(self, user_id: UUID, username: str):
         """Generate access and refresh tokens"""
-        access_token = self.token_issuer.generate_token(
+        access_token = TokenIssuer.generate_token(
             user_id, username, "access"
         )
-        refresh_token = self.token_issuer.generate_token(
+        refresh_token = TokenIssuer.generate_token(
             user_id, username, "refresh"
         )
 
@@ -107,7 +57,7 @@ class TokenHandler:
     async def reauth(self, old_refresh_token: str) -> tuple[str, str]:
         """Invalidate old refresh token and issue new tokens."""
         # Decode old refresh token
-        dec = self.token_checker.decode_token(old_refresh_token, "refresh")
+        dec = TokenUtils.decode_token(old_refresh_token, "refresh")
         decoded = dec.claims
         
         user_id = UUID(decoded["sub"])

@@ -1,5 +1,6 @@
-from pydantic import Field
+from pydantic import Field, EmailStr, SecretStr, field_validator
 
+from shared_utils import TextUtils
 from shared_schemas import (
     BaseSchema,
     Username,
@@ -11,9 +12,25 @@ from shared_schemas import (
 # Requests
 ##############################################################################################
 
-
 class RequestRegister(Username, UserEmail, UserPassword):
     """Request body for registering a new user."""
+    
+    
+    @field_validator("username")
+    @classmethod
+    def validate_username(cls, v: str) -> str:
+        return TextUtils.sanitize_text(v)
+
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, v: EmailStr) -> str:
+        return TextUtils.is_valid_and_safe_email(v)
+
+    @field_validator("password")
+    @classmethod
+    def validate_password(cls, v: SecretStr) -> str:
+        return TextUtils.sanitize_text(v.get_secret_value())
+
 
 
 class RequestLogin(Username, UserPassword):
@@ -28,46 +45,3 @@ class RefreshTokenBody(BaseSchema):
 # Responses
 ##############################################################################################
 
-
-class ResponseRegister(Username, UserEmail):
-    """Modelo para representar un registro."""
-
-    message: str = Field(
-        default="Registro correcto",
-        min_length=2,
-        max_length=256,
-        description="Un mensaje que indica que el registro fue exitoso.",
-    )
-
-
-class ResponseDelete(Username, UserEmail):
-    """Modelo para representar un delete."""
-
-    message: str = Field(
-        default="Delete correcto",
-        min_length=2,
-        max_length=256,
-        description="Un mensaje que indica que el delete fue exitoso.",
-    )
-
-
-class ResponseLogout(BaseSchema):
-    """Modelo para representar un logout."""
-
-    message: str = Field(
-        default="Logout correcto",
-        min_length=2,
-        max_length=256,
-        description="Un mensaje que indica que el logout fue exitoso.",
-    )
-
-
-class ResponseUpdate(BaseSchema):
-    """Modelo para representar un update."""
-
-    message: str = Field(
-        default="Usuario actualizado correctamente",
-        min_length=2,
-        max_length=256,
-        description="Un mensaje que indica que el update fue exitoso.",
-    )

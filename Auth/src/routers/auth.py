@@ -2,63 +2,60 @@ from typing import Annotated, Union
 
 from pydantic import SecretStr
 
-from fastapi import APIRouter, Depends, Form
+from fastapi import APIRouter, Depends, Form, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestFormStrict
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from handlers.users import UserHandler
-from services.auth import AuthService
-from schemas.auth import RequestRegister
-from schemas.auth import ResponseRegister, ResponseLogout
+from domain import AuthService, TokenService
+from application import AuthAppService
+
+from schemas import RequestRegister
+from schemas import ResponseRegister, ResponseLogout
 
 from shared_db import get_session
-from shared_schemas import ResponseWeb, ResponseMobile
+from shared_schemas import ResponseWeb, ResponseMobile, ResponseMessage
 from shared_schemas import CustomError, ItemError
-from shared_utils.auth.auth import TokenContext, get_refresh_token
+from shared_utils import TokenContext
+from shared_utils.tokens.tokens import get_refresh_token
+
+class UserAlreadyExists(Exception):
+    """Usuario ya existe."""
 
 router = APIRouter(tags=["Autenticación"], prefix="/auth")
 
 
 @router.post(
     "/register",
-    response_model=ResponseRegister,
+    response_model=ResponseMessage,
     response_model_exclude_none=True,
     operation_id="register_user",
 )
 async def register(
     form: Annotated[RequestRegister, Form()],
-    db: AsyncSession = Depends(get_session),
 ):
     """Function for registering"""
     try:
-        user = await UserHandler(db).register_user(
-            form.username, form.email, form.password
+        auth_service = AuthService()
+        user = await auth_service.register(
+            form.username, 
+            form.email, 
+            form.password.get_secret_value()
         )
-
-        if user:
-            return ResponseRegister(username=user.username, email=user.email)
-        else:
-            raise CustomError(
-                errors=[
-                    ItemError(
-                        code="USER_ALREADY_EXISTS",
-                        message="Registration failed on router.",
-                        more_info="User already exists.",
-                    )
-                ]
-            )
-
+        return ResponseMessage(
+            
+        )
+    except UserAlreadyExists:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User already exists"
+        )
     except Exception as e:
-        raise CustomError(
-            errors=[
-                ItemError(
-                    code="REGISTRATION_FAILED_ROUTER",
-                    message="Registration failed on router.",
-                    more_info=str(e),
-                )
-            ]
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Registration failed: {str(e)}"
         )
+
 
 
 @router.post(
@@ -70,12 +67,13 @@ async def register(
 async def login(
     form_data: OAuth2PasswordRequestFormStrict = Depends(),
     ctx: TokenContext = Depends(),
-    db: AsyncSession = Depends(get_session),
 ):
     """Function for logging in"""
     password = SecretStr(form_data.password)
-    access_token, refresh_token = await AuthService(db).login_with_tokens(
-        form_data.username, password
+    auth_service = AuthService()
+    token_service = TokenService()
+    access_token, refresh_token = await AuthAppService(auth_service, token_service).login_and_issue_tokens(
+        form_data.username, password.get_secret_value()
     )
     return ctx.make_return(access_token, refresh_token)
 
