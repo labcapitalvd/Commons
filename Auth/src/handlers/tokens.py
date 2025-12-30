@@ -10,7 +10,7 @@ from joserfc.jwk import OKPKey
 from db.tokens import TokenDb
 from utils.tokens import TokenIssuer
 
-from shared_utils import TokenUtils
+from shared_utils.tokens import TokenIssuer, TokenVerifier
 
 
 LOGLEVEL = os.environ["LOGLEVEL"].lower() in (
@@ -32,8 +32,6 @@ with open(JWT_PRIVATE_KEY_FILE, "rb") as f:
 
 logger = logging.getLogger("seed/users")
 logger.setLevel(LOGLEVEL)
-
-registry = jws.JWSRegistry(algorithms=[JWT_ASYMETRIC_ALGORITHM])
 
 
 class TokenHandler:
@@ -57,7 +55,7 @@ class TokenHandler:
     async def reauth(self, old_refresh_token: str) -> tuple[str, str]:
         """Invalidate old refresh token and issue new tokens."""
         # Decode old refresh token
-        dec = TokenUtils.decode_token(old_refresh_token, "refresh")
+        dec = TokenVerifier.decode_token(old_refresh_token, "refresh")
         decoded = dec.claims
         
         user_id = UUID(decoded["sub"])

@@ -1,5 +1,5 @@
 [project]
-name = "Hub-LABCapital-VDEAP"
+name = "Commons"
 version = "0.1.0"
 description = "Pyproject para desarrollo de todo el proyecto. SOLO DEV, NO PRODUCCIÓN"
 readme = "README.md"

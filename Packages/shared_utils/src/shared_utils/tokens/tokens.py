@@ -1,44 +1,56 @@
-import os
 import logging
-from uuid import UUID
-from typing import Optional, Literal
+import os
 
-from fastapi import Request, Response, Header, Body
-from fastapi.security import OAuth2PasswordBearer
+from datetime import datetime, timedelta, timezone
+from uuid import UUID, uuid7
+from typing import Literal
 
 from joserfc import jwt
-from joserfc.jwk import OKPKey
 from joserfc.errors import (
-    JoseError,
     BadSignatureError,
     ConflictAlgorithmError,
     DecodeError,
-    ExpiredTokenError,
-    InvalidExchangeKeyError,
     ExceededSizeError,
+    ExpiredTokenError,
+    InsecureClaimError,
+    InvalidExchangeKeyError,
+    JoseError,
 )
 
-from shared_utils.tokens.errors import (
-    TokenTypeError,
-    TokenExpiredError,
+from fastapi.security import OAuth2PasswordBearer
+
+from .errors import (
     TokenDecodeError,
+    TokenEncodeError,
+    TokenExpiredError,
+    TokenTypeError,
 )
 
-from shared_schemas import RefreshToken, ResponseWeb, ResponseMobile
+from .config import (
+    JWT_ASYMETRIC_ALGORITHM,
+    JWT_EXPIRE_MINUTES_ACCESS,
+    JWT_EXPIRE_MINUTES_REFRESH,
+    PRIVATE_KEY,
+    PUBLIC_KEY,
+    REGISTRY,
+)
 
+LOGLEVEL = os.environ["LOGLEVEL"].lower() in (
+    "debug",
+    "info",
+    "warning",
+    "error",
+    "critical",
+)
 
-JWT_ASYMETRIC_ALGORITHM = os.environ["JWT_ASYMETRIC_ALGORITHM"]
+logger = logging.getLogger("seed/users")
+logger.setLevel(LOGLEVEL)
 
-JWT_PUBLIC_KEY_FILE = "/run/secrets/jwt_public_key"
-if not os.path.exists(JWT_PUBLIC_KEY_FILE):
-    raise FileNotFoundError(f"JWT_PUBLIC_KEY_FILE file not found at {JWT_PUBLIC_KEY_FILE}")
-with open(JWT_PUBLIC_KEY_FILE, "rb") as f:
-    JWT_PUBLIC_KEY = OKPKey.import_key(f.read())
+TokenType = Literal["access", "refresh"]
 
 
 PRODUCTION_MODE = os.environ["PRODUCTION_MODE"].lower() in ("1", "true", "yes")
 COOKIES_SECURE = False if not PRODUCTION_MODE else True
-JWT_EXPIRE_MINUTES_REFRESH = int(os.environ["JWT_EXPIRE_MINUTES_REFRESH"])
 LOGLEVEL = os.environ["LOGLEVEL"].lower() in (
     "debug",
     "info",
@@ -58,21 +70,60 @@ logger.setLevel(LOGLEVEL)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/public/api/login")
 
 
+class TokenIssuer:
+    @staticmethod
+    def generate_token(user_id: UUID, username: str, token_type: TokenType = "access") -> str:
+        """
+        Generate either an access or refresh token.
+        token_type: "access" | "refresh"
+        """
+        try:
+            now = datetime.now(timezone.utc)
+
+            expire_minutes = (
+                JWT_EXPIRE_MINUTES_ACCESS
+                if token_type == "access"
+                else JWT_EXPIRE_MINUTES_REFRESH
+            )
+            exp = now + timedelta(minutes=expire_minutes)
+
+            header = {"typ": "JWT", "alg": "EdDSA"}
+
+            claims = {
+                "sub": str(user_id),
+                "username": username,
+                "token_type": token_type,
+                "iat": int(now.timestamp()),
+                "exp": int(exp.timestamp()),
+            }
+
+            if token_type == "refresh":
+                claims["jti"] = str(uuid7())
+            return jwt.encode(header, claims, PRIVATE_KEY, registry=REGISTRY)
+
+        except InsecureClaimError:
+            raise TokenEncodeError("Insecure claim error")
+
+        except JoseError as e:
+            logger.error(f"Error encoding {token_type} token: {e}")
+            raise TokenEncodeError(f"Error encoding {token_type} token: {e}")
+
+
 class TokenVerifier:
     @staticmethod
-    def decode_token(token: str, expected_type: str):
+    def decode_token(token: str, expected_type: TokenType):
         """
         Decode a JWT and validate its type.
         expected_type: "access" | "refresh"
         """
         try:
             payload = jwt.decode(
-                token, JWT_PUBLIC_KEY, algorithms=[JWT_ASYMETRIC_ALGORITHM]
+                token, PUBLIC_KEY, algorithms=[JWT_ASYMETRIC_ALGORITHM]
             )
             if payload.claims.get("token_type") != expected_type:
                 raise TokenTypeError(f"Token must be a {expected_type} token")
             return payload
-        
+
         except BadSignatureError:
             raise TokenDecodeError(
                 f"Error decoding {expected_type} token: Invalid signature"
@@ -97,7 +148,7 @@ class TokenVerifier:
             raise TokenDecodeError(
                 f"{expected_type.capitalize()} token exceeded size limit"
             )
-        
+
         except InvalidExchangeKeyError:
             raise TokenDecodeError(
                 f"Error decoding {expected_type} token: Invalid exchange key"

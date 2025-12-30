@@ -7,15 +7,14 @@ from fastapi.security import OAuth2PasswordRequestFormStrict
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from domain import AuthService, TokenService
 from application import AuthAppService
+from domain import AuthService, TokenService
 
-from schemas import RequestRegister
-from schemas import ResponseRegister, ResponseLogout
+from schemas.auth import RequestRegister
+from schemas.auth import ResponseRegister, ResponseLogout
 
 from shared_db import get_session
 from shared_schemas import ResponseWeb, ResponseMobile, ResponseMessage
-from shared_schemas import CustomError, ItemError
 from shared_utils import TokenContext
 from shared_utils.tokens.tokens import get_refresh_token
 
@@ -42,9 +41,7 @@ async def register(
             form.email, 
             form.password.get_secret_value()
         )
-        return ResponseMessage(
-            
-        )
+        return ResponseMessage(message="correct")
     except UserAlreadyExists:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

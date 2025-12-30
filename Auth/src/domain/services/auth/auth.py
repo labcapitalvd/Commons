@@ -50,7 +50,7 @@ class AuthService:
                 password_hash=HashUtils.hash_string(password)
             )
             
-            await uow.users.add(user)
+            await uow.users.add_user(user)
             return user
         
     async def login(
@@ -61,6 +61,9 @@ class AuthService:
         """Login user."""
         async with self.uow_factory() as uow:
             user = await uow.users.get_by_username(username)
+            
+            if not user:
+                raise InvalidCredentials("Invalid credentials")
             
             stored_hash = user.password_hash if user else DUMMY_HASH
             if not HashUtils.verify_hash(password, stored_hash):
@@ -77,20 +80,66 @@ class AuthService:
         async with self.uow_factory() as uow:
             user = await uow.users.get_by_username(username)
             
+            if not user:
+                raise InvalidCredentials("Invalid credentials")
+            
             stored_hash = user.password_hash if user else DUMMY_HASH
             if not HashUtils.verify_hash(password, stored_hash):
                 raise InvalidCredentials("Invalid credentials")
-                
-            uow.users.delete_user(user)
-            
-            return user
+
+        await uow.users.delete_user(user)
+        return user
 
 
 
 
 
+# class AuthService:
+#     def __init__(self, db: AsyncSession):
+#         self.auth = UserHandler(db)
+#         self.tokens = TokenHandler(db)
+#         self.tokenchecker = TokenChecker()
 
+#     async def login_with_tokens(
+#         self, username: str, password: SecretStr
+#     ) -> tuple[str, str]:
+#         """Login user and issue tokens."""
+#         try:
+#             user = await self.auth.login_user(username, password)
+#             if not user:
+#                 logger.error(f"User error: {username}")
+#                 raise 
+#             return await self.tokens.issue_tokens(user.id, user.username)
+#         except Exception as e:
+#             logger.error(f"Login error: {e}")
+#             raise 
+#     async def rotate_tokens(self, old_refresh_token: str) -> tuple[str, str]:
+#         """Re-authenticate and issue new tokens."""
+#         try:
+#             dec = self.tokenchecker.decode_token(
+#                 old_refresh_token,
+#                 "refresh"
+#             )
+#             decoded = dec.claims
+#             user_id = UUID(decoded["sub"])
 
+#             user = await self.auth.get_user(user_id)
+#             if not user:
+#                 logger.error(f"User error: {user_id}")
+#                 raise 
+#             return await self.tokens.reauth(old_refresh_token)
+#         except Exception as e:
+#             logger.error(f"Error rotating tokens: {e}")
+#             raise
+#     async def logout_user(self, refresh_token: str):
+#         """Invalidate refresh token."""
+#         try:
+#             dec = self.tokenchecker.decode_token(
+#                 refresh_token,
+#                 "refresh"
+#             )
+#             decoded = dec.claims
+#             user_id = UUID(decoded["sub"])
 
 # class AuthService:
 #     def __init__(self, db: AsyncSession):
