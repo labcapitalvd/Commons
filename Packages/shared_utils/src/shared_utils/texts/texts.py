@@ -7,8 +7,11 @@ from shared_utils.texts.errors import TextError, TextEmptyTarget, TextMaliciousT
 
 
 class TextUtils:
+    @staticmethod
     def sanitize_text(
-        self, text: str, remove_emojis: bool = False, remove_html: bool = False
+        text: str, 
+        remove_emojis: bool = False, 
+        remove_html: bool = False
     ) -> str:
         if not text or text.strip() == "":
             raise TextEmptyTarget("Sanitation target is empty.")
@@ -41,7 +44,10 @@ class TextUtils:
 
         return text
 
-    def is_valid_and_safe_email(self, email: str) -> str:
+    @staticmethod
+    def is_valid_and_safe_email(
+        email: str
+    ) -> str:
         # Trim whitespace and escape basic HTML actors
         text = email.strip()
         text = html.escape(text)
@@ -61,7 +67,10 @@ class TextUtils:
 
         return text
 
-    def generate_text_hash(self, text: str) -> str:
+    @staticmethod
+    def generate_text_hash(
+        text: str
+    ) -> str:
         """Generate SHA-256 hash of a given string."""
         try:
             if not text or text.strip() == "":
