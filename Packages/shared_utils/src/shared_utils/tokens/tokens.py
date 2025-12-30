@@ -1,5 +1,6 @@
-import logging
 import os
+import logging
+from typing import Optional
 
 from datetime import datetime, timedelta, timezone
 from uuid import UUID, uuid7
@@ -72,7 +73,11 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/public/api/login")
 
 class TokenIssuer:
     @staticmethod
-    def generate_token(user_id: UUID, username: str, token_type: TokenType = "access") -> str:
+    def generate_token(
+        user_id: UUID, 
+        username: str, 
+        token_type: str = "access"
+    ) -> tuple[str, int, Optional[str]]:
         """
         Generate either an access or refresh token.
         token_type: "access" | "refresh"
@@ -97,9 +102,13 @@ class TokenIssuer:
                 "exp": int(exp.timestamp()),
             }
 
+            jti = None
             if token_type == "refresh":
-                claims["jti"] = str(uuid7())
-            return jwt.encode(header, claims, PRIVATE_KEY, registry=REGISTRY)
+                jti = str(uuid7())
+                claims["jti"] = jti  # must be added BEFORE encoding
+    
+            token = jwt.encode(header, claims, PRIVATE_KEY, registry=REGISTRY)
+            return token, int(exp.timestamp()), jti
 
         except InsecureClaimError:
             raise TokenEncodeError("Insecure claim error")

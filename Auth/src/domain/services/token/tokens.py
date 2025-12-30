@@ -7,8 +7,7 @@ from datetime import datetime, timezone
 from shared_utils import HashUtils
 from shared_models import RefreshSession
 
-from utils.tokens import TokenIssuer
-from shared_utils import TokenVerifier
+from shared_utils import TokenIssuer, TokenVerifier
 
 from infrastructure.uow import AuthUnitOfWork
 
