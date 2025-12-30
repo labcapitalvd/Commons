@@ -22,7 +22,11 @@ class BaseSchema(BaseModel):
 class UuidSchema(BaseSchema):
     """Modelo para representar un UUID."""
 
-    id: UUID = Field(..., description="UUID del objeto")
+    id: UUID = Field(
+        ...,
+        title="UUID del objeto.",
+        description="el UUID en v4 o v7 de un objeto en la db"
+    )
 
 
 ##############################################################################################
@@ -35,6 +39,6 @@ class ResponseMessage(BaseSchema):
         ...,
         min_length=1,
         max_length=256,
-        title="Mensaje",
-        description="Un mensaje de la api.",
+        title="Mensaje de API.",
+        description="Un mensaje personalizable de la API.",
     )
