@@ -32,8 +32,6 @@ from .errors import (
     TokenTypeError,
 )
 
-from shared_utils.logging import get_logger
-
 from shared_schemas import RefreshToken, ResponseWeb, ResponseMobile
 
 from fastapi import Request, Response, Header, Body
@@ -211,7 +209,9 @@ class TokenContext:
             return ResponseWeb(access_token=access_token)
         elif self.platform == "mobile":
             return ResponseMobile(
-                access_token=access_token, refresh_token=refresh_token
+                access_token=access_token,
+                refresh_token=refresh_token,
+                message="mobile"
             )
         raise
 
@@ -219,7 +219,7 @@ class TokenContext:
         """Decode access token and return user object."""
         token = await self.extract_access()
         try:
-            dec = self.decode_token(token, "access")
+            dec = TokenVerifier.decode_token(token, "access")
             payload = dec.claims
             user_id = UUID(payload["sub"])
             return user_id
