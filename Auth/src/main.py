@@ -14,7 +14,7 @@ from fastapi.exceptions import RequestValidationError
 from routers.auth import router as router_auth
 from routers.files import router as router_files
 
-from shared_utils import configure_logging
+from shared_utils import configure_logging, get_logger
 from shared_models.relationships import * 
 
 from shared_schemas import (

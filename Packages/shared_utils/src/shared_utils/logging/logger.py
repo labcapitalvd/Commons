@@ -1,5 +1,3 @@
-# shared_utils/logging.py
-
 import os
 import logging
 from typing import Literal
@@ -31,4 +29,4 @@ def configure_logging() -> None:
 
 
 def get_logger(name: str) -> logging.Logger:
-    return get_logger(name)
+    return logging.getLogger(name)
