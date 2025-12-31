@@ -10,7 +10,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from application import AuthAppService
 from domain import AuthService, TokenService
 
+from infrastructure.uow import AuthUoW
 from schemas.auth import RequestRegister
+
 
 from shared_db import get_session
 from shared_schemas import ResponseWeb, ResponseMobile, ResponseMessage
@@ -34,23 +36,15 @@ async def register(
 ):
     """Function for registering"""
     try:
-        auth_service = AuthService()
-        user = await auth_service.register(
-            form.username, 
-            form.email, 
-            form.password.get_secret_value()
+        await AuthAppService().register(
+            form.username,
+            form.email,
+            form.password.get_secret_value(),
         )
         return ResponseMessage(message="correct")
+
     except UserAlreadyExists:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User already exists"
-        )
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Registration failed: {str(e)}"
-        )
+        raise HTTPException(status_code=400, detail="User already exists")
 
 
 
@@ -66,10 +60,9 @@ async def login(
 ):
     """Function for logging in"""
     password = SecretStr(form_data.password)
-    auth_service = AuthService()
-    token_service = TokenService()
-    access_token, refresh_token = await AuthAppService(auth_service, token_service).login_and_issue_tokens(
-        form_data.username, password.get_secret_value()
+    access_token, refresh_token = await AuthAppService().login_and_issue_tokens(
+        username=form_data.username,
+        password=password.get_secret_value()
     )
     return ctx.make_return(access_token, refresh_token)
 
@@ -86,7 +79,9 @@ async def refresh_token(
     db: AsyncSession = Depends(get_session),
 ):
     """Function for refreshing token"""
-    tokens = await AuthService(db).rotate_tokens(refresh_token)
+    tokens = await AuthAppService().reauth_refresh(
+        old_refresh_token=refresh_token
+    )
     return ctx.make_return(*tokens)
 
 
@@ -102,5 +97,7 @@ async def logout(
     db: AsyncSession = Depends(get_session),
 ):
     """Function for logging out"""
-    await AuthService(db).logout_user(refresh_token)
+    await AuthAppService().logout(
+        refresh_token=refresh_token
+    )
     return ResponseMessage(message="ok")
