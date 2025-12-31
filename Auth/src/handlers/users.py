@@ -47,7 +47,7 @@ class UserHandler:
             return None
 
         except Exception as e:
-            logging.error(f"Registration failed on handler: {str(e)}")
+            logger.error(f"Registration failed on handler: {str(e)}")
             raise
 
     async def login_user(
@@ -60,14 +60,14 @@ class UserHandler:
             user = await self.userondb.get_user_entry(username=username)
 
             stored_hash = user.password_hash if user else "$2b$12$" + "a" * 53
-            password_matches = HashUtils.verify_hash(password, stored_hash)
+            password_matches = HashUtils.verify_password(password, stored_hash)
 
             if user and password_matches:
                 return user
 
             return None
         except Exception as e:
-            logging.error(f"Login failed on handler: {str(e)}")
+            logger.error(f"Login failed on handler: {str(e)}")
             raise
 
     async def delete_user(
@@ -82,7 +82,7 @@ class UserHandler:
                 username=username, email=email, passwd=password
             )
         except Exception as e:
-            logging.error(f"Delete failed on handler: {str(e)}")
+            logger.error(f"Delete failed on handler: {str(e)}")
             raise
 
     async def update_username(self, current_user: UUID, username_api: str) -> bool:
@@ -94,7 +94,7 @@ class UserHandler:
             )
             return True
         except Exception as e:
-            logging.error(f"Update failed on username update: {str(e)}")
+            logger.error(f"Update failed on username update: {str(e)}")
             raise
 
     async def update_email(self, current_user: UUID, email_api: EmailStr) -> bool:
@@ -104,7 +104,7 @@ class UserHandler:
             await self.userondb.update_user_entry(id=current_user, new_email=email)
             return True
         except Exception as e:
-            logging.error(f"Update failed on email update: {str(e)}")
+            logger.error(f"Update failed on email update: {str(e)}")
             raise
 
     async def update_password(
@@ -118,5 +118,5 @@ class UserHandler:
             )
             return True
         except Exception as e:
-            logging.error(f"Update failed on password update: {str(e)}")
+            logger.error(f"Update failed on password update: {str(e)}")
             raise
