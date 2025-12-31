@@ -3,7 +3,7 @@ from shared_db import UnitOfWork
 from ..repositories import UserRepository, RoleRepository, RefreshTokenRepository
 
 
-class AuthUnitOfWork(UnitOfWork):
+class AuthUoW(UnitOfWork):
     async def __aenter__(self):
         await super().__aenter__()
         assert self.session is not None

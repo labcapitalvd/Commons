@@ -1,6 +1,6 @@
-from .auth import AuthUnitOfWork
+from .auth import AuthUoW
 
 
 __all__ = [
-    "AuthUnitOfWork",
+    "AuthUoW",
 ]

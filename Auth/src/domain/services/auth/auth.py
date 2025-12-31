@@ -1,7 +1,7 @@
 from shared_utils import get_logger, HashUtils
 from shared_models import User
 
-from infrastructure.uow import AuthUnitOfWork
+from infrastructure.uow import AuthUoW
 
 from .errors import InvalidCredentials, UserAlreadyExists
 
@@ -28,71 +28,70 @@ class AuthCrypto:
 DUMMY_HASH = AuthCrypto.hash_password("this-value-does-not-matter")
 
 
-class AuthService:
-    def __init__(self, uow_factory=AuthUnitOfWork):
-        self.uow_factory = uow_factory
-        
+class AuthService:        
     async def register(
         self,
         username: str,
         email: str, 
-        password: str
+        password: str,
+        uow: AuthUoW,
     ) -> User:
         """Register user."""
-        async with self.uow_factory() as uow:
-            if await uow.users.get_by_username(username):
-                raise UserAlreadyExists()
-            
-            password_hash = AuthCrypto.hash_password(password)
-            
-            user = User(
-                username=username,
-                email=email,
-                password_hash=password_hash
-            )
-            
-            uow.users.add_user(user)
-            return user
+        if await uow.users.get_by_username(username):
+            raise UserAlreadyExists()
         
+        password_hash = AuthCrypto.hash_password(password)
+        
+        user = User(
+            username=username,
+            email=email,
+            password_hash=password_hash
+        )
+        
+        uow.users.add_user(user)
+        return user
+
+
     async def login(
         self, 
         username: str, 
-        password: str
+        password: str,
+        uow: AuthUoW,
     ) -> User:
         """Login user."""
-        async with self.uow_factory() as uow:
-            user = await uow.users.get_by_username(username)
-            
-            if not user:
-                raise InvalidCredentials("Invalid credentials")
-            
-            stored_hash = user.password_hash if user else DUMMY_HASH
-            if not AuthCrypto.verify_password(
-                password,
-                stored_hash
-            ):
-                raise InvalidCredentials()
-            
-            return user
+        user = await uow.users.get_by_username(username)
         
+        if not user:
+            raise InvalidCredentials("Invalid credentials")
+        
+        stored_hash = user.password_hash if user else DUMMY_HASH
+        if not AuthCrypto.verify_password(
+            password,
+            stored_hash
+        ):
+            raise InvalidCredentials()
+        
+        return user
+
+
     async def delete_account(
         self, 
         username: str, 
-        password: str
+        password: str,
+        uow: AuthUoW,
     ) -> User:
         """Delete user."""
-        async with self.uow_factory() as uow:
-            user = await uow.users.get_by_username(username)
-            
-            if not user:
-                raise InvalidCredentials("Invalid credentials")
-            
-            stored_hash = user.password_hash if user else DUMMY_HASH
-            if not AuthCrypto.verify_password(
-                password,
-                stored_hash
-            ):
-                raise InvalidCredentials()
+        user = await uow.users.get_by_username(username)
+        
+        if not user:
+            raise InvalidCredentials("Invalid credentials")
+        
+        stored_hash = user.password_hash if user else DUMMY_HASH
+        if not AuthCrypto.verify_password(
+            password,
+            stored_hash
+        ):
+            raise InvalidCredentials()
 
-            uow.users.delete_user(user)
+        uow.users.delete_user(user)
         return user

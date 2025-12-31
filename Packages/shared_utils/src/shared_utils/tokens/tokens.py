@@ -140,6 +140,14 @@ class TokenVerifier:
             raise TokenDecodeError(f"Error decoding {expected_type} token: {str(e)}")
 
 
+class TokenPresenter:
+    def __init__(self, mode: Literal["web", "mobile"]):
+        self.mode = mode
+
+    def present(self, access: str, refresh: str) -> Response:
+        ...
+
+
 class TokenContext:
     def __init__(
         self,

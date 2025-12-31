@@ -6,7 +6,7 @@ from shared_utils import get_logger, HashUtils
 from shared_models import RefreshSession
 from shared_utils import TokenIssuer, TokenVerifier
 
-from infrastructure.uow import AuthUnitOfWork
+from infrastructure.uow import AuthUoW
 
 from .errors import TokenRevoked, TokenInvalid
 
@@ -31,12 +31,11 @@ class TokenCrypto:
 
 
 class TokenService:
-    @classmethod
     async def issue_tokens(
-        cls,
+        self,
         user_id: UUID, 
         username: str, 
-        uow: AuthUnitOfWork
+        uow: AuthUoW
     ) -> tuple[str, str]:
         """Generate access and refresh tokens"""
         access_token, _, _ = TokenIssuer.generate_token(user_id, username, "access")
@@ -58,11 +57,11 @@ class TokenService:
         uow.tokens.create_refresh_token(db_token)
         return access_token, refresh_token
 
-    @classmethod
+
     async def reauth(
-        cls,
+        self,
         old_refresh_token: str,
-        uow: AuthUnitOfWork
+        uow: AuthUoW
     ) -> tuple[str, str]:
         """Invalidate old refresh token and issue new tokens."""
             
@@ -83,17 +82,17 @@ class TokenService:
         
         uow.tokens.delete_refresh_token(old_token)
         
-        return await cls.issue_tokens(
+        return await self.issue_tokens(
             UUID(decoded["sub"]),
             decoded["username"],
             uow=uow
         )
 
-    @classmethod
+
     async def logout(
-        cls,
+        self,
         refresh_token: str,
-        uow: AuthUnitOfWork
+        uow: AuthUoW
     ) -> None:
         """Invalidate refresh token only."""
 
