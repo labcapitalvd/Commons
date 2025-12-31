@@ -2,11 +2,12 @@ from datetime import datetime, timezone
 from typing import Optional
 from uuid import UUID
 
-from shared_models import RefreshSession
-from shared_utils import HashUtils, TokenVerifier
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from shared_models import RefreshSession
+from shared_utils import HashUtils, TokenVerifier
 
 
 class TokenDb:
@@ -24,20 +25,18 @@ class TokenDb:
 
             jti = decoded.get("jti")
             if not jti:
-                logger.error("Missing JTI in token")
                 raise ValueError("Missing JTI in token")
 
             stmt = select(RefreshSession).where(RefreshSession.jti == jti)
             result = await self.db.execute(stmt)
             session = result.scalar_one_or_none()
 
-            if session and HashUtils.verify_hash(refresh_token, session.refresh_hash):
+            if session and HashUtils.verify_token(refresh_token, session.refresh_hash):
                 return session
 
             return None
 
         except Exception as e:
-            logger.error(f"Unknown error: {e}")
             raise
 
     async def create_refresh_token_entry(
@@ -52,7 +51,7 @@ class TokenDb:
             user_id = UUID(decoded["sub"])
             expires_at = datetime.fromtimestamp(decoded["exp"], tz=timezone.utc)
 
-            hashed_refresh = HashUtils.hash_string(refresh_token)
+            hashed_refresh = HashUtils.hash_token(refresh_token)
 
             session = RefreshSession(
                 jti=jti,
@@ -68,12 +67,10 @@ class TokenDb:
 
         except IntegrityError as e:
             await self.db.rollback()
-            logger.error(f"Integrity error: {e}")
             raise
 
         except Exception as e:
             await self.db.rollback()
-            logger.error(f"Unknown error: {e}")
             raise
 
     async def delete_refresh_token_entry(self, token: str) -> bool:
@@ -85,7 +82,6 @@ class TokenDb:
             jti = decoded.get("jti")
 
             if not jti:
-                logger.error("Missing JTI in token")
                 raise ValueError("Missing JTI in token")
 
             result = await self.db.execute(
@@ -101,10 +97,8 @@ class TokenDb:
 
         except IntegrityError as e:
             await self.db.rollback()
-            logger.error(f"Integrity error: {e}")
             raise
 
         except Exception as e:
             await self.db.rollback()
-            logger.error(f"Unknown error: {e}")
             raise

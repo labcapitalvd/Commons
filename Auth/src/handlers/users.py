@@ -5,7 +5,7 @@ from pydantic import EmailStr, SecretStr
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared_models import User
-from shared_utils.logging import get_logger
+from shared_utils.logger import get_logger
 from shared_utils import HashUtils, TextUtils
 
 from db.users import UsersDb

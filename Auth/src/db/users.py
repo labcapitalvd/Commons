@@ -1,11 +1,12 @@
 from typing import Optional
 from uuid import UUID
 
-from shared_models import User, UserTier
-from shared_utils import HashUtils
 from sqlalchemy import or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from shared_models import User, UserTier
+from shared_utils import HashUtils
 
 
 class UsersDb:
@@ -27,7 +28,6 @@ class UsersDb:
             elif email:
                 stmt = select(User).where(User.email == email)
             else:
-                logger.error("Must supply id, username, or email")
                 raise ValueError("Must supply id, username, or email")
             result = await self.db.execute(stmt)
             user = result.scalar_one_or_none()
@@ -38,7 +38,6 @@ class UsersDb:
             return None
 
         except Exception as e:
-            logger.error(f"Unknown error: {e}")
             raise
 
     async def create_user_entry(
@@ -54,13 +53,12 @@ class UsersDb:
             ).scalar_one_or_none()
 
             if not tier:
-                logger.error("Default user tier not found")
                 raise ValueError("Default user tier not found")
 
             user = User(
                 username=username,
                 email=email,
-                password_hash=HashUtils.hash_string(passwd),
+                password_hash=HashUtils.hash_password(passwd),
                 is_active=True,
                 tier_id=tier.id,
             )
@@ -71,12 +69,10 @@ class UsersDb:
 
         except IntegrityError as e:
             await self.db.rollback()
-            logger.error(f"Integrity error: {e}")
             raise
 
         except Exception as e:
             await self.db.rollback()
-            logger.error(f"Unknown error: {e}")
             raise
 
     async def update_user_entry(
@@ -101,7 +97,7 @@ class UsersDb:
             if new_email is not None:
                 user.email = new_email
             if new_password is not None:
-                user.password_hash = HashUtils.hash_string(new_password)
+                user.password_hash = HashUtils.hash_password(new_password)
 
             await self.db.commit()
             await self.db.refresh(user)
@@ -109,12 +105,10 @@ class UsersDb:
 
         except IntegrityError as e:
             await self.db.rollback()
-            logger.error(f"IntegrityError: {e}")
             raise
 
         except Exception as e:
             await self.db.rollback()
-            logger.error(f"Unknown error: {e}")
             raise
 
     async def delete_user_entry(
@@ -123,7 +117,6 @@ class UsersDb:
         "Delete a user by username/email and password."
         try:
             if not username and not email:
-                logger.error("Must supply username or email")
                 raise ValueError("Must supply username or email")
 
             result = await self.db.execute(
@@ -134,7 +127,7 @@ class UsersDb:
                 return False
 
             # Check password
-            if not HashUtils.verify_hash(passwd, user.password_hash):
+            if not HashUtils.verify_password(passwd, user.password_hash):
                 return False
 
             # Delete
@@ -144,10 +137,8 @@ class UsersDb:
 
         except IntegrityError as e:
             await self.db.rollback()
-            logger.error(f"IntegrityError: {e}")
             raise
 
         except Exception as e:
             await self.db.rollback()
-            logger.error(f"Unknown error: {e}")
             raise

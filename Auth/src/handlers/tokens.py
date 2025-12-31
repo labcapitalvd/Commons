@@ -4,19 +4,11 @@ from uuid import UUID
 from joserfc.jwk import OKPKey
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from shared_utils.logging import get_logger
 from shared_utils import TokenIssuer, TokenVerifier
 
 from db.tokens import TokenDb
 
 
-LOGLEVEL = os.environ["LOGLEVEL"].lower() in (
-    "debug",
-    "info",
-    "warning",
-    "error",
-    "critical",
-)
 JWT_ASYMETRIC_ALGORITHM = os.environ["JWT_ASYMETRIC_ALGORITHM"]
 JWT_EXPIRE_MINUTES_ACCESS = int(os.environ["JWT_EXPIRE_MINUTES_ACCESS"])
 JWT_EXPIRE_MINUTES_REFRESH = int(os.environ["JWT_EXPIRE_MINUTES_REFRESH"])
@@ -29,7 +21,6 @@ if not os.path.exists(JWT_PRIVATE_KEY_FILE):
 with open(JWT_PRIVATE_KEY_FILE, "rb") as f:
     JWT_PRIVATE_KEY = OKPKey.import_key(f.read())
 
-logger = get_logger("seed/users")
 
 
 class TokenHandler:
@@ -39,8 +30,8 @@ class TokenHandler:
 
     async def issue_tokens(self, user_id: UUID, username: str):
         """Generate access and refresh tokens"""
-        access_token = TokenIssuer.generate_token(user_id, username, "access")
-        refresh_token = TokenIssuer.generate_token(user_id, username, "refresh")
+        access_token, _, _ = TokenIssuer.generate_token(user_id, username, "access")
+        refresh_token, _, _ = TokenIssuer.generate_token(user_id, username, "refresh")
 
         await self.tokenondb.create_refresh_token_entry(refresh_token)
 
@@ -55,10 +46,10 @@ class TokenHandler:
         user_id = UUID(decoded["sub"])
         username = decoded["username"]
 
-        self.tokenondb.delete_refresh_token_entry(old_refresh_token)
+        await self.tokenondb.delete_refresh_token_entry(old_refresh_token)
 
         return await self.issue_tokens(user_id, username)
 
     async def logout(self, refresh_token: str) -> None:
         """Invalidate refresh token only."""
-        self.tokenondb.delete_refresh_token_entry(refresh_token)
+        await self.tokenondb.delete_refresh_token_entry(refresh_token)
