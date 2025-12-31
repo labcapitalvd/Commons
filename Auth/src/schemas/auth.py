@@ -24,13 +24,13 @@ class RequestRegister(Username, UserEmail, UserPassword):
     @field_validator("email")
     @classmethod
     def validate_email(cls, v: EmailStr) -> str:
-        return TextUtils.is_valid_and_safe_email(v)
+        return TextUtils.is_valid_and_safe_email(str(v))
 
     @field_validator("password")
     @classmethod
-    def validate_password(cls, v: SecretStr) -> str:
-        return TextUtils.sanitize_text(v.get_secret_value())
-
+    def validate_password(cls, v: SecretStr) -> SecretStr:
+        sanitized = TextUtils.sanitize_text(v.get_secret_value())
+        return SecretStr(sanitized)
 
 
 class RequestLogin(Username, UserPassword):

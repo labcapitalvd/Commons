@@ -1,6 +1,6 @@
 from shared_db import UnitOfWork
 
-from ..repositories import UserRepository, RoleRepository, RefreshTokenRepository
+from ..repositories import UserRepository, RoleRepository, TierRepository, RefreshTokenRepository
 
 
 class AuthUoW(UnitOfWork):
@@ -10,6 +10,7 @@ class AuthUoW(UnitOfWork):
 
         self.users: UserRepository = UserRepository(self.session)
         self.roles: RoleRepository = RoleRepository(self.session)
+        self.tiers: TierRepository = TierRepository(self.session)
         self.tokens: RefreshTokenRepository = RefreshTokenRepository(self.session)
 
         return self

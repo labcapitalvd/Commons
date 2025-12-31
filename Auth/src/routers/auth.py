@@ -1,8 +1,8 @@
-from typing import Annotated, Union
+from typing import Union
 
 from pydantic import SecretStr
 
-from fastapi import APIRouter, Depends, Form, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestFormStrict
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -29,7 +29,7 @@ router = APIRouter(tags=["Autenticación"], prefix="/auth")
     operation_id="register_user",
 )
 async def register(
-    form: Annotated[RequestRegister, Form()],
+    form: RequestRegister
 ):
     """Function for registering"""
     try:

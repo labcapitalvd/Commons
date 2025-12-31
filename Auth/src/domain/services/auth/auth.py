@@ -3,7 +3,7 @@ from shared_models import User
 
 from infrastructure.uow import AuthUoW
 
-from .errors import InvalidCredentials, UserAlreadyExists
+from .errors import InvalidCredentials, UserAlreadyExists, TierDoesntExist
 
 
 class AuthCrypto:
@@ -37,9 +37,14 @@ class AuthService:
         if await uow.users.get_by_username(username):
             raise UserAlreadyExists()
         
+        default_tier = await uow.tiers.get_default()
+        if not default_tier:
+            raise TierDoesntExist()
+        
         password_hash = AuthCrypto.hash_password(password)
         
         user = User(
+            tier_id=default_tier.id,
             username=username,
             email=email,
             password_hash=password_hash
