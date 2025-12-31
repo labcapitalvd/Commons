@@ -47,7 +47,8 @@ class AuthService:
             tier_id=default_tier.id,
             username=username,
             email=email,
-            password_hash=password_hash
+            password_hash=password_hash,
+            is_active=True,
         )
         
         uow.users.add_user(user)
