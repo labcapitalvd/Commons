@@ -7,10 +7,6 @@ from sqlalchemy.orm import Session
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared_models import User
-from shared_utils import get_logger
-
-
-logger = get_logger("api/db")
 
 
 class UserRepository:

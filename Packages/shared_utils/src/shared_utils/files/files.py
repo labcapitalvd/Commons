@@ -5,14 +5,8 @@ from fastapi import UploadFile
 
 import aiofiles
 
-class FileError(Exception):
-    """Base error for FileDisk."""
+from .errors import FileError, FileNameError, FileOSError
 
-class FileNameError(FileError):
-    pass
-
-class FileOSError(FileError):
-    pass
 
 class FileDisk:
     async def save_file(

@@ -24,6 +24,7 @@ from .config import (
     PUBLIC_KEY,
     REGISTRY,
 )
+
 from .errors import (
     TokenDecodeError,
     TokenEncodeError,
@@ -31,7 +32,7 @@ from .errors import (
     TokenTypeError,
 )
 
-from shared_utils import get_logger
+from shared_utils.logging import get_logger
 
 
 PRODUCTION_MODE = os.environ["PRODUCTION_MODE"].lower() in ("1", "true", "yes")
@@ -41,8 +42,6 @@ COOKIES_SECURE = False if not PRODUCTION_MODE else True
 COOKIES_SAMESITE: Literal["lax", "strict", "none"] = (
     "strict" if PRODUCTION_MODE and COOKIES_SECURE else "lax"
 )
-
-logger = get_logger("shared_utils/tokens")
 
 TokenType = Literal["access", "refresh"]
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/public/api/login")
@@ -89,7 +88,6 @@ class TokenIssuer:
             raise TokenEncodeError("Insecure claim error")
 
         except JoseError as e:
-            logger.error(f"Error encoding {token_type} token: {e}")
             raise TokenEncodeError(f"Error encoding {token_type} token: {e}")
 
 
@@ -163,7 +161,6 @@ class TokenContext:
         """Extract token from header"""
         token = self.request.headers.get("Authorization")
         if not token or not token.startswith("Bearer "):
-            logger.error("Invalid token")
             raise
         return token.split(" ", 1)[1]
 
@@ -175,23 +172,19 @@ class TokenContext:
             if self.platform == "web":
                 token = self.request.cookies.get("refresh_token")
                 if not token:
-                    logger.error("Invalid refresh token")
                     raise
                 return token
 
             elif self.platform == "mobile":
                 if body is None:
-                    logger.error("Invalid refresh token")
                     raise
                 token = body.refresh_token
                 return token
 
             else:
-                logger.error("Invalid platform")
                 raise
 
         except Exception as e:
-            logger.error(f"Failed to extract refresh token -> {e}")
             raise
 
     def set_refresh_cookie(self, refresh_token: str):
@@ -216,7 +209,6 @@ class TokenContext:
             return ResponseMobile(
                 access_token=access_token, refresh_token=refresh_token
             )
-        logger.error("Invalid platform")
         raise
 
     async def get_current_user(self) -> UUID:
@@ -228,7 +220,6 @@ class TokenContext:
             user_id = UUID(payload["sub"])
             return user_id
         except Exception as e:
-            logger.error(f"Failed to decode token: {e}")
             raise
 
 

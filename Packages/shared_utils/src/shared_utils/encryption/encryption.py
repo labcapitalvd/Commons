@@ -1,7 +1,7 @@
 from typing import Optional
 from cryptography.fernet import Fernet
 
-from shared_utils.encryption.errors import CryptoError, EmptyEncryptionTarget
+from .errors import CryptoError, EmptyEncryptionTarget
 
 
 class CryptoUtils:

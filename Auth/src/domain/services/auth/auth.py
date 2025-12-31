@@ -1,12 +1,9 @@
-from shared_utils import get_logger, HashUtils
+from shared_utils import HashUtils
 from shared_models import User
 
 from infrastructure.uow import AuthUoW
 
 from .errors import InvalidCredentials, UserAlreadyExists
-
-
-logger = get_logger("api/main")
 
 
 class AuthCrypto:

@@ -3,12 +3,10 @@ from typing import Optional
 from uuid import UUID
 
 from shared_models import RefreshSession
-from shared_utils import get_logger, HashUtils, TokenVerifier
+from shared_utils import HashUtils, TokenVerifier
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-
-logger = get_logger("api/tokens")
 
 
 class TokenDb:

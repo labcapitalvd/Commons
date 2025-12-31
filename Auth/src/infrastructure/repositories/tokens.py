@@ -5,11 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from shared_utils import get_logger
 from shared_models import RefreshSession
-
-
-logger = get_logger("api/db")
 
 
 class RefreshTokenRepository:

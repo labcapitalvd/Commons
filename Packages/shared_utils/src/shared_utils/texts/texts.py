@@ -3,7 +3,7 @@ import re
 import hashlib
 import unicodedata
 
-from shared_utils.texts.errors import TextError, TextEmptyTarget, TextMaliciousTarget, TextMalformedTarget
+from .errors import TextError, TextEmptyTarget, TextMaliciousTarget, TextMalformedTarget
 
 
 class TextUtils:

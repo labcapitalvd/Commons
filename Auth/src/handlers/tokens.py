@@ -4,7 +4,7 @@ from uuid import UUID
 from joserfc.jwk import OKPKey
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from shared_utils import get_logger, TokenIssuer, TokenVerifier
+from shared_utils.logging import get_logger, TokenIssuer, TokenVerifier
 
 from db.tokens import TokenDb
 

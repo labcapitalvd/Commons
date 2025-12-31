@@ -3,7 +3,7 @@ from uuid import UUID
 
 from pydantic import EmailStr, SecretStr
 from shared_models import User
-from shared_utils import get_logger, HashUtils, TextUtils
+from shared_utils.logging import get_logger, HashUtils, TextUtils
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.users import UsersDb

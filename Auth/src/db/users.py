@@ -2,12 +2,10 @@ from typing import Optional
 from uuid import UUID
 
 from shared_models import User, UserTier
-from shared_utils import get_logger, HashUtils
+from shared_utils import HashUtils
 from sqlalchemy import or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-
-logger = get_logger("api/db")
 
 
 class UsersDb:

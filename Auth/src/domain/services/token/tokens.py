@@ -2,16 +2,13 @@
 from uuid import UUID
 from datetime import datetime, timezone
 
-from shared_utils import get_logger, HashUtils
+from shared_utils import HashUtils
 from shared_models import RefreshSession
 from shared_utils import TokenIssuer, TokenVerifier
 
 from infrastructure.uow import AuthUoW
 
 from .errors import TokenRevoked, TokenInvalid
-
-
-logger = get_logger("api/main")
 
 
 class TokenCrypto:

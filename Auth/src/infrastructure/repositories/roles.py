@@ -3,11 +3,7 @@ from typing import Optional
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from shared_utils import get_logger
 from shared_models import Role
-
-
-logger = get_logger("api/db")
 
 
 class RoleRepository:
