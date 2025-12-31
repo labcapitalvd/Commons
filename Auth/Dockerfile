@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y \
 RUN --mount=type=secret,id=github_token \
     GITHUB_TOKEN=$(cat /run/secrets/github_token) && \
     curl -L -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-    https://raw.githubusercontent.com/LABCapital-VD/Commons/main/packages/shared_utils/fetch.sh \
+    https://raw.githubusercontent.com/LABCapital-VD/Commons/main/Packages/shared_utils/fetch.sh \
     -o /usr/local/bin/fetch.sh && \
     chmod +x /usr/local/bin/fetch.sh
 
@@ -42,11 +42,13 @@ RUN pip install --no-cache-dir -e .
 # 4. Copy app
 # -----------------------------
 COPY src/main.py ./main.py
+COPY src/application ./application
 COPY src/db ./db
+COPY src/domain ./domain
 COPY src/handlers ./handlers
+COPY src/infrastructure ./infrastructure
 COPY src/routers ./routers
 COPY src/schemas ./schemas
-COPY src/services ./services
 COPY src/utils ./utils
 
 # -----------------------------

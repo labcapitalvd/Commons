@@ -2,9 +2,11 @@ from typing import Optional
 from uuid import UUID
 
 from pydantic import EmailStr, SecretStr
-from shared_models import User
-from shared_utils.logging import get_logger, HashUtils, TextUtils
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from shared_models import User
+from shared_utils.logging import get_logger
+from shared_utils import HashUtils, TextUtils
 
 from db.users import UsersDb
 

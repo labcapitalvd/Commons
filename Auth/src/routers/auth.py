@@ -2,15 +2,12 @@ from typing import Annotated, Union
 
 from pydantic import SecretStr
 
-from fastapi import APIRouter, Depends, Form, HTTPException, status
+from fastapi import APIRouter, Depends, Form, HTTPException
 from fastapi.security import OAuth2PasswordRequestFormStrict
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from application import AuthAppService
-from domain import AuthService, TokenService
-
-from infrastructure.uow import AuthUoW
 from schemas.auth import RequestRegister
 
 

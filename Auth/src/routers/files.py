@@ -6,17 +6,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from handlers.files import FileHandler
 from schemas.files import (
-    RequestFile,
-    RequestEditFile,
-    RequestDeleteFile,
-    ResponseFile,
     ResponseFiles,
 )
 from utils.allowed_types import FileTypeEnum
 
 from shared_db import get_session
 from shared_schemas import ResponseMessage
-from shared_utils.auth.auth import TokenContext
+from shared_utils import TokenContext
 
 router = APIRouter(tags=["Archivos"], prefix="/files")
 
