@@ -1,4 +1,3 @@
-from typing import Optional
 from uuid import UUID
 
 from sqlalchemy import or_, select
@@ -18,7 +17,7 @@ class UsersDb:
         id: Optional[UUID] = None,
         username: Optional[str] = None,
         email: Optional[str] = None,
-    ) -> Optional[User]:
+    ) -> User | None:
         """Fetch a User by ID, username, or email."""
         try:
             if id:
@@ -42,7 +41,7 @@ class UsersDb:
 
     async def create_user_entry(
         self, username: str, email: str, passwd: str
-    ) -> Optional[User]:
+    ) -> User | None:
         """Create an entry in the database for the user"""
 
         try:
@@ -79,10 +78,10 @@ class UsersDb:
         self,
         *,
         id: UUID,
-        new_username: Optional[str] = None,
-        new_email: Optional[str] = None,
-        new_password: Optional[str] = None,
-    ) -> Optional[User]:
+        new_username: str | None = None,
+        new_email: str | None = None,
+        new_password: str | None = None,
+    ) -> User | None:
         "Update a user's fields dynamically."
         try:
             user = (
@@ -112,7 +111,7 @@ class UsersDb:
             raise
 
     async def delete_user_entry(
-        self, passwd: str, username: Optional[str] = None, email: Optional[str] = None
+        self, passwd: str, username: str | None = None, email: str | None = None
     ) -> bool:
         "Delete a user by username/email and password."
         try:

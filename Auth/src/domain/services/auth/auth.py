@@ -1,4 +1,4 @@
-from shared_utils import HashUtils
+from shared_utils.hashing import hash_password, verify_password
 from shared_models import User
 
 from infrastructure.uow import AuthUoW
@@ -6,23 +6,7 @@ from infrastructure.uow import AuthUoW
 from .errors import InvalidCredentials, UserAlreadyExists, TierDoesntExist
 
 
-class AuthCrypto:
-    @staticmethod
-    def hash_password(raw: str) -> str:
-        try:
-            return HashUtils.hash_password(raw)
-        except Exception as e:
-            raise RuntimeError("Failed to hash password") from e
-
-    @staticmethod
-    def verify_password(raw: str, hashed: str) -> bool:
-        try:
-            return HashUtils.verify_password(raw, hashed)
-        except Exception:
-            return False
-
-
-DUMMY_HASH = AuthCrypto.hash_password("this-value-does-not-matter")
+DUMMY_HASH = hash_password(password="this-value-does-not-matter")
 
 
 class AuthService:        
@@ -41,7 +25,7 @@ class AuthService:
         if not default_tier:
             raise TierDoesntExist()
         
-        password_hash = AuthCrypto.hash_password(password)
+        password_hash = hash_password(password=password)
         
         user = User(
             tier_id=default_tier.id,
@@ -68,11 +52,10 @@ class AuthService:
             raise InvalidCredentials("Invalid credentials")
         
         stored_hash = user.password_hash if user else DUMMY_HASH
-        if not AuthCrypto.verify_password(
-            password,
-            stored_hash
-        ):
-            raise InvalidCredentials()
+        try:
+            verify_password(password=password, hashed_password=stored_hash)
+        except Exception as e:
+            raise InvalidCredentials() from e
         
         return user
 
@@ -90,11 +73,10 @@ class AuthService:
             raise InvalidCredentials("Invalid credentials")
         
         stored_hash = user.password_hash if user else DUMMY_HASH
-        if not AuthCrypto.verify_password(
-            password,
-            stored_hash
-        ):
-            raise InvalidCredentials()
+        try:
+            verify_password(password=password, hashed_password=stored_hash)
+        except Exception as e:
+            raise InvalidCredentials() from e
 
         uow.users.delete_user(user)
         return user

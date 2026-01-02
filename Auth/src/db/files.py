@@ -1,15 +1,14 @@
-from uuid import UUID
 from datetime import datetime, timezone
-from typing import Sequence, Optional
 from decimal import Decimal
-
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.exc import NoResultFound, IntegrityError
-
-from utils.allowed_types import FileTypeEnum
+from typing import Sequence
+from uuid import UUID
 
 from shared_models import File, FileType
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError, NoResultFound
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from utils.allowed_types import FileTypeEnum
 
 
 class FileDb:
@@ -24,9 +23,9 @@ class FileDb:
             )
             return result.scalar_one()
         except Exception:
-            raise 
+            raise
 
-    async def check_duplicity(self, owner: UUID, filehash: str) -> Optional[File]:
+    async def check_duplicity(self, owner: UUID, filehash: str) -> File | None:
         """Check if a file with the given hash exists for the owner"""
         try:
             result = await self.db.execute(
@@ -34,7 +33,7 @@ class FileDb:
             )
             return result.scalar_one_or_none()
         except Exception:
-            raise 
+            raise
 
     async def get_file_entry(self, id: UUID, owner: UUID) -> File:
         """Create an entry in the database for the uploaded file"""
@@ -48,10 +47,10 @@ class FileDb:
             return result.scalar_one()
 
         except NoResultFound:
-            raise 
+            raise
 
         except Exception:
-            raise 
+            raise
 
     async def get_all_file_entries(self, owner: UUID) -> Sequence[File]:
         """Create an entry in the database for the uploaded file"""
@@ -64,7 +63,7 @@ class FileDb:
             return result.scalars().all()
 
         except Exception:
-            raise 
+            raise
 
     async def create_file_entry(
         self,
@@ -93,16 +92,16 @@ class FileDb:
             return media
         except Exception:
             await self.db.rollback()
-            raise 
+            raise
 
     async def update_file_entry(
         self,
         id: UUID,
         owner: UUID,
-        filetype_id: Optional[UUID] = None,
-        filename: Optional[str] = None,
-        filepath: Optional[str] = None,
-        filehash: Optional[str] = None,
+        filetype_id: UUID | None = None,
+        filename: str | None= None,
+        filepath: str | None = None,
+        filehash: str | None = None,
     ) -> File:
         """Create an entry in the database for the uploaded file"""
         try:
@@ -128,15 +127,15 @@ class FileDb:
             return media
 
         except NoResultFound:
-            raise 
+            raise
 
         except IntegrityError:
             await self.db.rollback()
-            raise 
+            raise
 
         except Exception:
             await self.db.rollback()
-            raise 
+            raise
 
     async def delete_file_entry(self, id: UUID, owner: UUID) -> None:
         """Create an entry in the database for the uploaded file"""
@@ -153,12 +152,12 @@ class FileDb:
             await self.db.commit()
 
         except NoResultFound:
-            raise 
+            raise
 
         except IntegrityError:
             await self.db.rollback()
-            raise 
+            raise
 
         except Exception:
             await self.db.rollback()
-            raise 
+            raise

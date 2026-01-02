@@ -3,7 +3,7 @@ from datetime import date, datetime, timezone
 from enum import Enum
 from decimal import Decimal
 
-from typing import Optional, TypeVar, Type, Union
+from typing import TypeVar, Type, Union
 
 from sqlalchemy import func, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
@@ -164,7 +164,7 @@ def column_slug(
 
 
 def column_jsonb(
-    *, nullable: bool = False, unique: bool = False, default: Optional[dict] = None
+    *, nullable: bool = False, unique: bool = False, default: dict | None = None
 ) -> Mapped[dict]:
     return mapped_column(
         JSONB, nullable=nullable, unique=unique, default=default or dict

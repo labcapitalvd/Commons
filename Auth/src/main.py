@@ -1,7 +1,5 @@
 import os
 
-
-from typing import Literal
 from fastapi import FastAPI
 
 from contextlib import asynccontextmanager
@@ -27,14 +25,17 @@ from shared_schemas import (
 configure_logging()
 
 VERSION = "0.1.0"
-PRODUCTION_MODE = os.environ["PRODUCTION_MODE"].lower() in ("1", "true", "yes")
+PRODUCTION_MODE = os.getenv("PRODUCTION_MODE", "false").lower() in (
+    "1", "true", "yes"
+)
+
 COOKIES_SECURE = False if not PRODUCTION_MODE else True
 
 
 PUBLIC = os.getenv("PUBLIC_ORIGINS", "*")
 NODE = os.environ["NODE_ORIGINS"]
 
-logger = get_logger("api/main")
+logger = get_logger(__name__)
 
 if not PRODUCTION_MODE:
     PUBLIC_ORIGINS = ["*"]
@@ -59,11 +60,6 @@ else:
     ]
     NODE_ORIGINS = [item.strip() for item in NODE.split(",") if item.strip()]
     NODE_ALLOWED_HOSTS = ["frontend"]
-
-
-COOKIES_SAMESITE: Literal["lax", "strict", "none"] = (
-    "strict" if PRODUCTION_MODE and COOKIES_SECURE else "lax"
-)
 
 ##############################################################################################
 # Context Manager

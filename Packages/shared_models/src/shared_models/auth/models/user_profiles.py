@@ -1,4 +1,3 @@
-from typing import Optional
 from datetime import datetime
 from uuid import UUID
 
@@ -21,13 +20,13 @@ class UserProfile(Base):
     user_id: Mapped[UUID] = column_fk(
         target=f"{TargetTable.USERS.fq_name}.id", unique=True
     )
-    file_id: Mapped[Optional[UUID]] = column_fk(
+    file_id: Mapped[UUID | None] = column_fk(
         target=f"{TargetTable.FILES.fq_name}.id",
         ondelete="CASCADE",
         unique=True,
         nullable=True,
     )
 
-    biography: Mapped[Optional[str]] = column_long_text(nullable=True)
+    biography: Mapped[str | None] = column_long_text(nullable=True)
     
     updated_at: Mapped[datetime] = column_updated_at()

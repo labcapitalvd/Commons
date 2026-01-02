@@ -1,5 +1,7 @@
-from .files import FileDisk
+from .files import save_file, rename_file, delete_file
 
 __all__ = [
-    "FileDisk",
+    "save_file",
+    "rename_file",
+    "delete_file",
 ]

@@ -1,4 +1,3 @@
-from typing import Optional
 from uuid import UUID
 
 from pydantic import EmailStr, SecretStr
@@ -11,7 +10,7 @@ from shared_utils import HashUtils, TextUtils
 from db.users import UsersDb
 
 
-logger = get_logger("seed/users")
+logger = get_logger(__name__)
 
 
 class UserHandler:
@@ -20,7 +19,7 @@ class UserHandler:
         self.userondb = UsersDb(self.db)
         self.textutils = TextUtils()
 
-    async def get_user(self, id: UUID) -> Optional[User]:
+    async def get_user(self, id: UUID) -> User | None:
         try:
             dup = await self.userondb.get_user_entry(id=id)
             if dup:
@@ -34,7 +33,7 @@ class UserHandler:
 
     async def register_user(
         self, username_api: str, email_api: EmailStr, password_api: SecretStr
-    ) -> Optional[User]:
+    ) -> User | None:
         try:
             username = self.textutils.sanitize_text(username_api)
             email = self.textutils.is_valid_and_safe_email(email_api)
@@ -52,7 +51,7 @@ class UserHandler:
 
     async def login_user(
         self, username_api: str, password_api: SecretStr
-    ) -> Optional[User]:
+    ) -> User | None:
         try:
             username = self.textutils.sanitize_text(username_api)
             password = self.textutils.sanitize_text(password_api.get_secret_value())

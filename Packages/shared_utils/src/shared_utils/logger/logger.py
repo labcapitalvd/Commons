@@ -2,6 +2,7 @@ import os
 import logging
 from typing import Literal
 
+
 LogLevel = Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
 _LOG_LEVELS: dict[str, int] = {

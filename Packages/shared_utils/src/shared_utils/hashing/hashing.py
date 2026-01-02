@@ -1,52 +1,56 @@
 from passlib.context import CryptContext
+from passlib.exc import UnknownHashError
 
 from .contexts import fast_context, token_context, password_context
-from .errors import HashError, EmptyHashTarget
+from .errors import HashError, EmptyHashTarget, HashMismatch, InvalidHashFormat
 
 
-class HashUtils:
-    @staticmethod
-    def _hash(ctx: CryptContext, value: str) -> str:
-        if not value or value.strip() == "":
-            raise EmptyHashTarget("Cannot hash empty string")
-        try:
-            return ctx.hash(value)
-        except Exception as e:
-            raise HashError(e)
+def hash_value(ctx: CryptContext, value: str) -> str:
+    if not value or not value.strip():
+        raise EmptyHashTarget("Cannot hash empty string")
 
-    @staticmethod
-    def _verify(ctx: CryptContext, value: str, hashed: str) -> bool:
-        if not value or value.strip() == "":
-            raise EmptyHashTarget("Cannot verify empty string")
-        if not hashed or hashed.strip() == "":
-            raise EmptyHashTarget("Cannot verify empty string")
-        try:
-            return ctx.verify(value, hashed)
-        except Exception as e:
-            raise HashError(e)
+    try:
+        return ctx.hash(value)
+    except Exception as e:
+        raise HashError("Hash operation failed") from e
 
-    # ---- public API ----
 
-    @classmethod
-    def hash_password(cls, password: str) -> str:
-        return cls._hash(password_context, password)
+def verify_value(ctx: CryptContext, value: str, hashed_value: str) -> None:
+    if not value or not value.strip():
+        raise EmptyHashTarget("Cannot verify empty string")
+    if not hashed_value or not hashed_value.strip():
+        raise EmptyHashTarget("Cannot verify empty string")
 
-    @classmethod
-    def verify_password(cls, password: str, hashed: str) -> bool:
-        return cls._verify(password_context, password, hashed)
+    try:
+        if not ctx.verify(value, hashed_value):
+            raise HashMismatch("Hash verification failed")
+    except UnknownHashError as e:
+        raise InvalidHashFormat("Unknown or invalid hash format") from e
+    except Exception as e:
+        raise HashError("Hash operation failed") from e
 
-    @classmethod
-    def hash_token(cls, token: str) -> str:
-        return cls._hash(token_context, token)
 
-    @classmethod
-    def verify_token(cls, token: str, hashed: str) -> bool:
-        return cls._verify(token_context, token, hashed)
+def hash_password(password: str) -> str:
+    """Hashes a password using the password context."""
+    return hash_value(password_context, password)
+    
+def hash_token(token: str) -> str:
+    """Hashes a token using the token context."""
+    return hash_value(token_context, token)
+    
+def hash_string(secret: str) -> str:
+    """Hashes a string using the fast context."""
+    return hash_value(fast_context, secret)
 
-    @classmethod
-    def hash_fast(cls, secret: str) -> str:
-        return cls._hash(fast_context, secret)
 
-    @classmethod
-    def verify_fast(cls, secret: str, hashed: str) -> bool:
-        return cls._verify(fast_context, secret, hashed)
+def verify_password(password: str, hashed_password: str) -> None:
+    """Verifies a password using the password context."""
+    verify_value(password_context, password, hashed_password)
+
+def verify_token(token: str, hashed_token: str) -> None:
+    """Verifies a token using the token context."""
+    verify_value(token_context, token, hashed_token)
+
+def verify_string(secret: str, hashed_secret: str) -> None:
+    """Verifies a string using the fast context."""
+    verify_value(fast_context, secret, hashed_secret)

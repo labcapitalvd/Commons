@@ -1,5 +1,4 @@
 from datetime import datetime, timezone
-from typing import Optional
 from uuid import UUID
 
 from sqlalchemy import select
@@ -7,7 +6,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared_models import RefreshSession
-from shared_utils import HashUtils, TokenVerifier
+from shared_utils.hashing import verify_token, hash_token
+from shared_utils.tokens import decode_token
 
 
 class TokenDb:
@@ -17,10 +17,10 @@ class TokenDb:
     async def get_refresh_token_entry(
         self,
         refresh_token: str,
-    ) -> Optional[RefreshSession]:
+    ) -> RefreshSession | None:
         """Fetch a User by ID, username, or email."""
         try:
-            dec = TokenVerifier.decode_token(refresh_token, "refresh")
+            dec = decode_token(refresh_token, "refresh")
             decoded = dec.claims
 
             jti = decoded.get("jti")
@@ -31,7 +31,7 @@ class TokenDb:
             result = await self.db.execute(stmt)
             session = result.scalar_one_or_none()
 
-            if session and HashUtils.verify_token(refresh_token, session.refresh_hash):
+            if session and verify_token(refresh_token, session.refresh_hash):
                 return session
 
             return None
@@ -41,17 +41,17 @@ class TokenDb:
 
     async def create_refresh_token_entry(
         self, refresh_token: str
-    ) -> Optional[RefreshSession]:
+    ) -> RefreshSession | None:
         """Create a new refresh token entry."""
         try:
-            dec = TokenVerifier.decode_token(refresh_token, "refresh")
+            dec = decode_token(refresh_token, "refresh")
             decoded = dec.claims
 
             jti = decoded["jti"]
             user_id = UUID(decoded["sub"])
             expires_at = datetime.fromtimestamp(decoded["exp"], tz=timezone.utc)
 
-            hashed_refresh = HashUtils.hash_token(refresh_token)
+            hashed_refresh = hash_token(refresh_token)
 
             session = RefreshSession(
                 jti=jti,
@@ -76,7 +76,7 @@ class TokenDb:
     async def delete_refresh_token_entry(self, token: str) -> bool:
         """Create a new refresh token entry."""
         try:
-            dec = TokenVerifier.decode_token(token, "refresh")
+            dec = decode_token(token, "refresh")
             decoded = dec.claims
 
             jti = decoded.get("jti")

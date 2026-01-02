@@ -1,5 +1,6 @@
-from .encryption import CryptoUtils
+from .encryption import encrypt, decrypt
 
 __all__ = [
-    "CryptoUtils",
+    "encrypt",
+    "decrypt",
 ]

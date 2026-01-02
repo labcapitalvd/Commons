@@ -1,6 +1,8 @@
-class CryptoError(Exception):
-    """Base error for CryptoUtils."""
+class EncryptionError(Exception):
+    """Base error for EncryptionUtils."""
 
+class EmptyEncryptionTarget(EncryptionError):
+    pass
 
-class EmptyEncryptionTarget(CryptoError):
+class EmptyDecryptionTarget(EncryptionError):
     pass

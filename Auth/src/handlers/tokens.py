@@ -30,8 +30,8 @@ class TokenHandler:
 
     async def issue_tokens(self, user_id: UUID, username: str):
         """Generate access and refresh tokens"""
-        access_token, _, _ = TokenIssuer.generate_token(user_id, username, "access")
-        refresh_token, _, _ = TokenIssuer.generate_token(user_id, username, "refresh")
+        access_token, _, _ = generate_token(user_id, username, "access")
+        refresh_token, _, _ = generate_token(user_id, username, "refresh")
 
         await self.tokenondb.create_refresh_token_entry(refresh_token)
 
@@ -40,7 +40,7 @@ class TokenHandler:
     async def reauth(self, old_refresh_token: str) -> tuple[str, str]:
         """Invalidate old refresh token and issue new tokens."""
         # Decode old refresh token
-        dec = TokenVerifier.decode_token(old_refresh_token, "refresh")
+        dec = decode_token(old_refresh_token, "refresh")
         decoded = dec.claims
 
         user_id = UUID(decoded["sub"])

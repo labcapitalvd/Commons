@@ -1,6 +1,5 @@
 import re
 import os
-from typing import Optional
 import hashlib
 
 from fastapi import UploadFile
@@ -37,7 +36,7 @@ class FileUtils:
             raise FileExtensionError("Invalid file format.")
         return filetype.category
 
-    def sanitize_filename(self, filename: str, extension: Optional[str] = None) -> str:
+    def sanitize_filename(self, filename: str, extension: str | None = None) -> str:
         # Split into base name + extension
         n, e = os.path.splitext(filename)
 

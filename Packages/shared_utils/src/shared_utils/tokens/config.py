@@ -3,7 +3,9 @@ import os
 from joserfc import jws
 from joserfc.jwk import OKPKey
 
-JWT_ASYMETRIC_ALGORITHM = os.environ["JWT_ASYMETRIC_ALGORITHM"]
+from shared_utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 JWT_EXPIRE_MINUTES_ACCESS = int(os.environ["JWT_EXPIRE_MINUTES_ACCESS"])
 JWT_EXPIRE_MINUTES_REFRESH = int(os.environ["JWT_EXPIRE_MINUTES_REFRESH"])
@@ -14,12 +16,14 @@ JWT_PUBLIC_KEY_FILE = "/run/secrets/jwt_public_key"
 
 def load_keys() -> tuple[OKPKey, OKPKey]:
     if not os.path.exists(JWT_PRIVATE_KEY_FILE):
-        raise FileNotFoundError(
+        logger.critical("JWT private key missing at %s", JWT_PRIVATE_KEY_FILE)
+        raise RuntimeError(
             f"JWT private key file not found at {JWT_PRIVATE_KEY_FILE}"
         )
 
     if not os.path.exists(JWT_PUBLIC_KEY_FILE):
-        raise FileNotFoundError(
+        logger.critical("JWT public key missing at %s", JWT_PUBLIC_KEY_FILE)
+        raise RuntimeError(
             f"JWT public key file not found at {JWT_PUBLIC_KEY_FILE}"
         )
 
@@ -32,4 +36,4 @@ def load_keys() -> tuple[OKPKey, OKPKey]:
     return private_key, public_key
 
 PRIVATE_KEY, PUBLIC_KEY = load_keys()
-REGISTRY = jws.JWSRegistry(algorithms=[JWT_ASYMETRIC_ALGORITHM])
+REGISTRY = jws.JWSRegistry(algorithms=["EdDSA"])

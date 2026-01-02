@@ -1,4 +1,3 @@
-from typing import Optional
 from typing import cast
 
 from sqlalchemy import select
@@ -12,7 +11,7 @@ class RefreshTokenRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def get_refresh_token_by_jti(self, jti: str) -> Optional[RefreshSession]:
+    async def get_refresh_token_by_jti(self, jti: str) -> RefreshSession | None:
         stmt = select(RefreshSession).where(RefreshSession.jti == jti)
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
