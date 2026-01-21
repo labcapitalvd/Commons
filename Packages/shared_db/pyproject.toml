@@ -2,7 +2,7 @@
 name = "shared_db"
 version = "0.1.0"
 description = "package para configurar la db."
-requires-python = ">=3.14"
+requires-python = ">=3.12"
 dependencies = [
     "asyncpg>=0.30.0",
     "psycopg>=3.2.12",
