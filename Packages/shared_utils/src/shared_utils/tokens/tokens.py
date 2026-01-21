@@ -1,7 +1,8 @@
 import os
 from datetime import datetime, timedelta, timezone
 from typing import Literal, Optional
-from uuid import UUID, uuid7
+from uuid import UUID
+from uuid-utils import uuid7
 
 from fastapi import Request, Response, Header
 

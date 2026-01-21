@@ -28,6 +28,7 @@ dependencies = [
     "shared_models",
     "shared_schemas",
     "shared_utils",
+    "uuid-utils>=0.14.0",
 ]
 
 [tool.uv.sources]

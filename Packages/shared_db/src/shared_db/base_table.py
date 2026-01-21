@@ -1,4 +1,5 @@
-from uuid import UUID, uuid7
+from uuid import UUID
+from uuid-utils import uuid7
 from enum import Enum
 from typing import cast
 
