@@ -9,4 +9,4 @@ services:
 
 secrets:
   github_token:
-    file: ../Secrets/github_token
+    environment: GITHUB_TOKEN 
