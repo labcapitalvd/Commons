@@ -3,30 +3,43 @@
 # Exit immediately if a command fails
 set -e
 
-# 1. Setup a temporary workspace
-TMP_DIR=$(mktemp -d -t release-XXXXXX)
-echo "📦 Working in temporary directory: $TMP_DIR"
-
-# Ensure cleanup happens even if the script crashes
-trap 'rm -rf "$TMP_DIR"; echo "🧹 Cleaned up $TMP_DIR"' EXIT
-
-# 2. Create the zips inside the tmp directory
-# We use full paths or relative paths to ensure zip captures the right files
-zip -r "$TMP_DIR/shared_db.zip" Packages/shared_db
-zip -r "$TMP_DIR/shared_models.zip" Packages/shared_models
-zip -r "$TMP_DIR/shared_schemas.zip" Packages/shared_schemas
-zip -r "$TMP_DIR/shared_utils.zip" Packages/shared_utils
-
-# 3. Get the secret from Seahorse/Keyring
-
-if [ -z "$GITHUB_TOKEN" ]; then
-    echo "❌ Error: Could not find GITHUB_TOKEN in Seahorse/Keyring."
+# 1. Check if a version argument was provided (e.g., ./release.sh v1.2.4)
+if [ -z "$1" ]; then
+    echo "❌ Error: No version provided."
+    echo "Usage: ./release.sh v1.x.x"
     exit 1
 fi
 
-# 4. Run ghr pointing to the tmp directory
+VERSION=$1
+
+# 2. Setup a temporary workspace
+TMP_DIR=$(mktemp -d -t release-XXXXXX)
+echo "📦 Working in temporary directory: $TMP_DIR"
+
+# Ensure cleanup happens even if the script crashes or you Ctrl+C
+trap 'rm -rf "$TMP_DIR"; echo "🧹 Cleaned up $TMP_DIR"' EXIT
+
+# 3. Create the zips inside the tmp directory
+# We (cd ...) so the zip doesn't contain the full "Packages/..." path prefix
+echo "🗜️  Zipping packages..."
+(cd Packages/shared_db      && zip -rq "$TMP_DIR/shared_db.zip" .)
+(cd Packages/shared_models  && zip -rq "$TMP_DIR/shared_models.zip" .)
+(cd Packages/shared_schemas && zip -rq "$TMP_DIR/shared_schemas.zip" .)
+(cd Packages/shared_utils   && zip -rq "$TMP_DIR/shared_utils.zip" .)
+
+# 4. Verification of Token
+if [ -z "$GITHUB_TOKEN" ]; then
+    echo "❌ Error: GITHUB_TOKEN is not set."
+    echo "Make sure you ran 'direnv allow' or have the secret in your env."
+    exit 1
+fi
+
+# 5. Run ghr to upload to GitHub
+echo "🚀 Uploading $VERSION to GitHub..."
 ghr -t "$GITHUB_TOKEN" \
-    -u SpanishSyntax \
-    -r your-repo-name \
+    -u LABCapital-VD \
+    -r Commons \
     -replace \
-    v1.2.4 "$TMP_DIR/"
+    "$VERSION" "$TMP_DIR/"
+
+echo "✅ Release $VERSION successful!"
