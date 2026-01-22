@@ -14,9 +14,9 @@ RUN apt-get update && apt-get install -y \
 # -----------------------------
 # 2. Install shared packages from GitHub
 # -----------------------------
-RUN --mount=type=secret,id=github_token \
-    export GITHUB_TOKEN=$(cat /run/secrets/github_token) && \
-    curl -L -H "Authorization: token ${GITHUB_TOKEN}" \
+RUN --mount=type=secret,id=github_token_commons \
+    export GITHUB_TOKEN_COMMONS=$(cat /run/secrets/github_token_commons) && \
+    curl -L -H "Authorization: token ${GITHUB_TOKEN_COMMONS}" \
     -H "Accept: application/vnd.github.v3.raw" \
     "https://api.github.com/repos/LABCapital-VD/Commons/contents/Packages/shared_utils/fetch.sh?ref=main" \
     -o /usr/local/bin/fetch.sh && \
@@ -27,13 +27,13 @@ RUN --mount=type=secret,id=github_token \
 # -----------------------------
 ARG CACHEBUST=1
 # Fetch/install each package
-RUN --mount=type=secret,id=github_token \
+RUN --mount=type=secret,id=github_token_commons \
     /usr/local/bin/fetch.sh LABCapital-VD/Commons shared_db.zip
-RUN --mount=type=secret,id=github_token \
+RUN --mount=type=secret,id=github_token_commons \
     /usr/local/bin/fetch.sh LABCapital-VD/Commons shared_models.zip
-RUN --mount=type=secret,id=github_token \
+RUN --mount=type=secret,id=github_token_commons \
     /usr/local/bin/fetch.sh LABCapital-VD/Commons shared_schemas.zip
-RUN --mount=type=secret,id=github_token \
+RUN --mount=type=secret,id=github_token_commons \
     /usr/local/bin/fetch.sh LABCapital-VD/Commons shared_utils.zip
 
 COPY src/pyproject.toml ./pyproject.toml
