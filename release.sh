@@ -20,7 +20,6 @@ echo "📦 Working in temporary directory: $TMP_DIR"
 trap 'rm -rf "$TMP_DIR"; echo "🧹 Cleaned up $TMP_DIR"' EXIT
 
 # 3. Create the zips inside the tmp directory
-# We (cd ...) so the zip doesn't contain the full "Packages/..." path prefix
 echo "🗜️  Zipping packages..."
 (cd Packages/shared_db      && zip -rq "$TMP_DIR/shared_db.zip" .)
 (cd Packages/shared_models  && zip -rq "$TMP_DIR/shared_models.zip" .)
@@ -28,7 +27,7 @@ echo "🗜️  Zipping packages..."
 (cd Packages/shared_utils   && zip -rq "$TMP_DIR/shared_utils.zip" .)
 
 # 4. Verification of Token
-if [ -z "$GITHUB_TOKEN" ]; then
+if [ -z "$GITHUB_TOKEN_COMMONS" ]; then
     echo "❌ Error: GITHUB_TOKEN is not set."
     echo "Make sure you ran 'direnv allow' or have the secret in your env."
     exit 1
@@ -36,7 +35,7 @@ fi
 
 # 5. Run ghr to upload to GitHub
 echo "🚀 Uploading $VERSION to GitHub..."
-ghr -t "$GITHUB_TOKEN" \
+ghr -t "$GITHUB_TOKEN_COMMONS" \
     -u LABCapital-VD \
     -r Commons \
     -replace \
