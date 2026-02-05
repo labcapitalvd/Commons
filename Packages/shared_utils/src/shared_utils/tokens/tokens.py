@@ -2,7 +2,7 @@ import os
 from datetime import datetime, timedelta, timezone
 from typing import Literal, Optional
 from uuid import UUID
-from uuid-utils import uuid7
+from uuid_utils import uuid7
 
 from fastapi import Request, Response, Header
 
@@ -181,5 +181,15 @@ class TokenContext:
                 secure=COOKIES_SECURE,
                 samesite=COOKIES_SAMESITE,
                 max_age=(JWT_EXPIRE_MINUTES_REFRESH * 60) - 120,
+                path="/",
+            )
+
+    def unset_refresh_cookie(self):
+        if self.platform == "web":
+            self.response.delete_cookie(
+                key="refresh_token",
+                httponly=True,
+                secure=COOKIES_SECURE,
+                samesite=COOKIES_SAMESITE,
                 path="/",
             )
