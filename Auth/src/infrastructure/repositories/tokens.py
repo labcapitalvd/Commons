@@ -1,10 +1,9 @@
 from typing import cast
 
-from sqlalchemy import select
-from sqlalchemy.orm import Session
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from shared_models import RefreshSession
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
 
 
 class RefreshTokenRepository:

@@ -1,12 +1,11 @@
+from typing import Sequence
 from uuid import UUID
-from typing import Sequence, Optional
 
+from shared_models import File, FileType
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from utils.allowed_types import FileTypeEnum
-
-from shared_models import File, FileType
 
 
 class FileRepository:
@@ -20,18 +19,17 @@ class FileRepository:
         result = await self.session.execute(stmt)
         return result.scalar_one()
 
-    # --- File queries ---
-    async def get_file_by_id(self, id: UUID, owner: UUID) -> Optional[File]:
+    async def get_file_by_id(self, id: UUID, owner: UUID) -> File | None:
         stmt = select(File).where(File.id == id, File.user_id == owner)
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def get_file_by_filename(self, filename: str, owner: UUID) -> Optional[File]:
+    async def get_file_by_filename(self, filename: str, owner: UUID) -> File | None:
         stmt = select(File).where(File.filename == filename, File.user_id == owner)
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def get_file_by_hash(self, filehash: str, owner: UUID) -> Optional[File]:
+    async def get_file_by_hash(self, filehash: str, owner: UUID) -> File | None:
         stmt = select(File).where(File.filehash == filehash, File.user_id == owner)
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()

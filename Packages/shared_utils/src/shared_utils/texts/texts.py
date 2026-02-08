@@ -1,9 +1,10 @@
-import re
 import hashlib
+import re
 import unicodedata
 
-from .errors import TextEmptyTarget, TextMalformedTarget
+from email_validator import EmailNotValidError, validate_email
 
+from .errors import TextEmptyTarget, TextMalformedTarget
 
 MAX_TEXT_LENGTH = 10_000
 MAX_EMAIL_LENGTH = 254
@@ -20,9 +21,7 @@ EMOJI_RE = re.compile(
     flags=re.UNICODE,
 )
 HTML_TAG_RE = re.compile(r"<[^>]+>")
-EMAIL_RE = re.compile(
-    r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
-)
+EMAIL_RE = re.compile(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$")
 
 
 def normalize_text(text: str) -> str:
@@ -60,19 +59,29 @@ def sanitize_text(
     return text
 
 
-def validate_email(email: str) -> str:
-    if not email or not email.strip():
-        raise TextEmptyTarget("Email is empty.")
+def sanitize_email(email: str) -> str:
+    """
+    Final sanitization before DB persistence.
+    Raises ValueError or TextMalformedTarget on failure.
+    """
+    # 1. Basic sanity & whitespace
+    if not email or not (email := email.strip()):
+        raise ValueError("Email is empty.")
 
-    email = unicodedata.normalize("NFKC", email).strip()
+    # 2. Unicode Normalization (NFKC)
+    # Prevents homograph attacks and encoding inconsistencies in DB
+    email = unicodedata.normalize("NFKC", email)
 
+    # 3. Length check (Crucial for DB column constraints)
     if len(email) > MAX_EMAIL_LENGTH:
-        raise TextMalformedTarget("Email too long.")
+        raise ValueError(f"Email exceeds DB limit of {MAX_EMAIL_LENGTH}")
 
-    if not EMAIL_RE.fullmatch(email):
-        raise TextMalformedTarget("Invalid email format.")
+    try:
+        email_info = validate_email(email, check_deliverability=False)
+        return email_info.normalized
 
-    return email
+    except EmailNotValidError as e:
+        raise ValueError(f"Invalid email: {str(e)}")
 
 
 def hash_text(text: str) -> str:

@@ -14,9 +14,9 @@ class UsersDb:
 
     async def get_user_entry(
         self,
-        id: Optional[UUID] = None,
-        username: Optional[str] = None,
-        email: Optional[str] = None,
+        id: UUID | None = None,
+        username: str | None = None,
+        email: str | None = None,
     ) -> User | None:
         """Fetch a User by ID, username, or email."""
         try:

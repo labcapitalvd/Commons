@@ -1,6 +1,6 @@
 import os
 from datetime import datetime, timedelta, timezone
-from typing import Literal, Optional
+from typing import Literal
 from uuid import UUID
 from uuid_utils import uuid7
 
@@ -35,23 +35,21 @@ from .errors import (
     TokenSignatureError,
     TokenExpiredError,
     TokenEmptyError,
-    InvalidPlatformError
+    InvalidPlatformError,
 )
 
 
-PRODUCTION_MODE = os.getenv("PRODUCTION_MODE", "false").lower() in (
-    "1", "true", "yes"
-)
+PRODUCTION_MODE = os.getenv("PRODUCTION_MODE", "false").lower() in ("1", "true", "yes")
 
 COOKIES_SECURE = False if not PRODUCTION_MODE else True
-COOKIES_SAMESITE = ("strict" if PRODUCTION_MODE and COOKIES_SECURE else "lax")
+COOKIES_SAMESITE = "strict" if PRODUCTION_MODE and COOKIES_SECURE else "lax"
 
 TokenType = Literal["access", "refresh"]
 
 
 def generate_token(
     user_id: UUID, username: str, token_type: TokenType = "access"
-) -> tuple[str, int, Optional[str]]:
+) -> tuple[str, int, str | None]:
     """
     Generate either an access or refresh token.
     token_type: "access" | "refresh"
@@ -88,9 +86,7 @@ def generate_token(
         raise TokenEncodeError("Insecure claim error") from e
 
     except JoseError as e:
-        raise TokenEncodeError(
-            f"Error encoding {token_type} token"
-        ) from e
+        raise TokenEncodeError(f"Error encoding {token_type} token") from e
 
 
 def decode_token(token: str, expected_type: TokenType):
@@ -129,9 +125,7 @@ def decode_token(token: str, expected_type: TokenType):
         raise TokenDecodeError("Invalid exchange key")
 
     except JoseError as e:
-        raise TokenDecodeError(
-            f"Error decoding {expected_type} token"
-        ) from e
+        raise TokenDecodeError(f"Error decoding {expected_type} token") from e
 
 
 class TokenContext:
@@ -150,15 +144,13 @@ class TokenContext:
         token = self.request.headers.get("Authorization")
         if not token:
             raise TokenEmptyError("Missing Authorization header")
-        
+
         scheme, _, value = token.partition(" ")
         if scheme.lower() != "bearer" or not value:
             raise TokenEmptyError("Invalid Authorization header")
         return value
 
-    async def extract_refresh(
-        self, body: RefreshToken | None = None
-    ) -> str:
+    async def extract_refresh(self, body: RefreshToken | None = None) -> str:
         if self.platform == "web":
             token = self.request.cookies.get("refresh_token")
             if not token:

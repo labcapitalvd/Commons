@@ -29,6 +29,7 @@ dependencies = [
     "shared_schemas",
     "shared_utils",
     "uuid-utils>=0.14.0",
+    "email-validator>=2.3.0",
 ]
 
 [tool.uv.sources]

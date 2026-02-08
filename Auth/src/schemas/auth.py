@@ -1,35 +1,34 @@
 from pydantic import EmailStr, SecretStr, field_validator
-
-from shared_utils import TextUtils
 from shared_schemas import (
     BaseSchema,
-    Username,
     UserEmail,
+    Username,
     UserPassword,
 )
+from shared_utils import sanitize_text, sanitize_email
 
 ##############################################################################################
 # Requests
 ##############################################################################################
 
+
 class RequestRegister(Username, UserEmail, UserPassword):
     """Request body for registering a new user."""
-    
-    
+
     @field_validator("username")
     @classmethod
     def validate_username(cls, v: str) -> str:
-        return TextUtils.sanitize_text(v)
+        return sanitize_text(v)
 
     @field_validator("email")
     @classmethod
     def validate_email(cls, v: EmailStr) -> str:
-        return TextUtils.is_valid_and_safe_email(str(v))
+        return sanitize_email(str(v))
 
     @field_validator("password")
     @classmethod
     def validate_password(cls, v: SecretStr) -> SecretStr:
-        sanitized = TextUtils.sanitize_text(v.get_secret_value())
+        sanitized = sanitize_text(v.get_secret_value())
         return SecretStr(sanitized)
 
 
@@ -44,4 +43,3 @@ class RefreshTokenBody(BaseSchema):
 ##############################################################################################
 # Responses
 ##############################################################################################
-

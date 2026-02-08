@@ -1,18 +1,21 @@
-import re
-import os
 import hashlib
-
-from fastapi import UploadFile
+import os
+import re
 import unicodedata
 from decimal import Decimal
 
+from fastapi import UploadFile
+
 from .allowed_types import FileTypeEnum
+
 
 class FileError(Exception):
     """Base error for FileUtils."""
 
+
 class FileNameError(FileError):
     pass
+
 
 class FileExtensionError(FileError):
     pass

@@ -99,7 +99,7 @@ class FileDb:
         id: UUID,
         owner: UUID,
         filetype_id: UUID | None = None,
-        filename: str | None= None,
+        filename: str | None = None,
         filepath: str | None = None,
         filehash: str | None = None,
     ) -> File:
