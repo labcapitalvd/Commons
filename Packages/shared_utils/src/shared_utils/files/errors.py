@@ -1,8 +1,11 @@
 class FileError(Exception):
     """Base error for FileDisk."""
 
+
 class FileNameError(FileError):
-    pass
+    """Bad filename or path"""
+
 
 class FileOSError(FileError):
-    pass
+    """General OS error"""
+

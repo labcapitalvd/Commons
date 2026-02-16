@@ -17,15 +17,11 @@ JWT_PUBLIC_KEY_FILE = "/run/secrets/jwt_public_key"
 def load_keys() -> tuple[OKPKey, OKPKey]:
     if not os.path.exists(JWT_PRIVATE_KEY_FILE):
         logger.critical("JWT private key missing at %s", JWT_PRIVATE_KEY_FILE)
-        raise RuntimeError(
-            f"JWT private key file not found at {JWT_PRIVATE_KEY_FILE}"
-        )
+        raise RuntimeError(f"JWT private key file not found at {JWT_PRIVATE_KEY_FILE}")
 
     if not os.path.exists(JWT_PUBLIC_KEY_FILE):
         logger.critical("JWT public key missing at %s", JWT_PUBLIC_KEY_FILE)
-        raise RuntimeError(
-            f"JWT public key file not found at {JWT_PUBLIC_KEY_FILE}"
-        )
+        raise RuntimeError(f"JWT public key file not found at {JWT_PUBLIC_KEY_FILE}")
 
     with open(JWT_PRIVATE_KEY_FILE, "rb") as f:
         private_key = OKPKey.import_key(f.read())
@@ -35,5 +31,7 @@ def load_keys() -> tuple[OKPKey, OKPKey]:
 
     return private_key, public_key
 
+
 PRIVATE_KEY, PUBLIC_KEY = load_keys()
 REGISTRY = jws.JWSRegistry(algorithms=["EdDSA"])
+

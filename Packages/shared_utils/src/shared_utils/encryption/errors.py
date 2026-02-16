@@ -7,8 +7,8 @@ class DecryptionError(Exception):
 
 
 class EmptyEncryptionTarget(EncryptionError):
-    pass
+    """Enrcyption target cannot be empty"""
 
 
 class EmptyDecryptionTarget(DecryptionError):
-    pass
+    """Decryption target cannot be empty"""

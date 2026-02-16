@@ -173,7 +173,7 @@ class TokenContext:
                 secure=COOKIES_SECURE,
                 samesite=COOKIES_SAMESITE,
                 max_age=(JWT_EXPIRE_MINUTES_REFRESH * 60) - 120,
-                path="/",
+                path="/auth/reauth",
             )
 
     def unset_refresh_cookie(self):
