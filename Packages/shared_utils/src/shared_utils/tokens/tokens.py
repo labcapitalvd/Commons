@@ -1,10 +1,10 @@
 import os
 from datetime import datetime, timedelta, timezone
-from typing import Literal
+from typing import Literal, Annotated
 from uuid import UUID
 from uuid_utils import uuid7
 
-from fastapi import Request, Response, Header
+from fastapi import Request, Response, Header, HTTPException, Cookie, Body
 
 from joserfc import jwt
 from joserfc.errors import (
@@ -131,38 +131,11 @@ def decode_token(token: str, expected_type: TokenType):
 class TokenContext:
     def __init__(
         self,
-        request: Request,
         response: Response,
-        platform: str = Header(default="web", alias="X-Platform"),
+        platform: Annotated[str, Header(alias="X-Platform")] = "web",
     ):
-        self.request = request
         self.response = response
         self.platform = platform
-
-    async def extract_access(self) -> str:
-        """Extract token from header"""
-        token = self.request.headers.get("Authorization")
-        if not token:
-            raise TokenEmptyError("Missing Authorization header")
-
-        scheme, _, value = token.partition(" ")
-        if scheme.lower() != "bearer" or not value:
-            raise TokenEmptyError("Invalid Authorization header")
-        return value
-
-    async def extract_refresh(self, body: RefreshToken | None = None) -> str:
-        if self.platform == "web":
-            token = self.request.cookies.get("refresh_token")
-            if not token:
-                raise TokenEmptyError("Missing refresh token cookie")
-            return token
-
-        if self.platform == "mobile":
-            if not body:
-                raise TokenEmptyError("Missing refresh token body")
-            return body.refresh_token
-
-        raise InvalidPlatformError(self.platform)
 
     def set_refresh_cookie(self, refresh_token: str):
         if self.platform == "web":
@@ -183,5 +156,26 @@ class TokenContext:
                 httponly=True,
                 secure=COOKIES_SECURE,
                 samesite=COOKIES_SAMESITE,
-                path="/",
             )
+
+async def get_refresh_token(                                                
+    request: Request,                                                       
+    platform: Annotated[str, Header(alias="X-Platform")] = "web",           
+    cookie_token: Annotated[str | None, Cookie(alias="refresh_token")] = None,
+    header_token: Annotated[RefreshToken | None, Header(alias="X-Platform")] = None,
+) -> str:
+    """                                                                     
+    Smart dependency that looks for the token in the right place            
+    based on the X-Platform header.                                         
+    """                                                                     
+    if platform == "web":                                                   
+        if not cookie_token:                                                
+            raise TokenEmptyError("Missing refresh token in cookies")       
+        return cookie_token                                                 
+                                                                            
+    elif platform == "mobile":                                              
+        if not header_token or not header_token.refresh_token:                  
+            raise TokenEmptyError("Missing refresh token in body")          
+        return header_token.refresh_token                                     
+                                                                            
+    raise InvalidPlatformError(f"Unknown platform: {platform}")   
