@@ -12,8 +12,7 @@ from schemas.auth import RequestRegister, RequestLogin
 
 from shared_db import get_session
 from shared_schemas import ResponseWeb, ResponseMobile, ResponseMessage
-from shared_utils.tokens import TokenContext
-from shared_utils.tokens.tokens import get_refresh_token
+from shared_utils import TokenContext, get_refresh_token
 
 class UserAlreadyExists(Exception):
     """Usuario ya existe."""

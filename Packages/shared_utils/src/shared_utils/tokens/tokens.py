@@ -4,7 +4,8 @@ from typing import Literal, Annotated
 from uuid import UUID
 from uuid_utils import uuid7
 
-from fastapi import Request, Response, Header, HTTPException, Cookie, Body
+from fastapi import Request, Response, Header, HTTPException, Cookie, Body, Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from joserfc import jwt
 from joserfc.errors import (
@@ -43,6 +44,8 @@ PRODUCTION_MODE = os.getenv("PRODUCTION_MODE", "false").lower() in ("1", "true",
 
 COOKIES_SECURE = False if not PRODUCTION_MODE else True
 COOKIES_SAMESITE = "strict" if PRODUCTION_MODE and COOKIES_SECURE else "lax"
+
+security = HTTPBearer(auto_error=False)
 
 TokenType = Literal["access", "refresh"]
 
@@ -158,24 +161,28 @@ class TokenContext:
                 samesite=COOKIES_SAMESITE,
             )
 
-async def get_refresh_token(                                                
-    request: Request,                                                       
-    platform: Annotated[str, Header(alias="X-Platform")] = "web",           
+async def get_refresh_token(
+    request: Request,
+    platform: Annotated[str, Header(alias="X-Platform")] = "web",
     cookie_token: Annotated[str | None, Cookie(alias="refresh_token")] = None,
-    header_token: Annotated[RefreshToken | None, Header(alias="X-Platform")] = None,
+    bearer_token: Annotated[
+        HTTPAuthorizationCredentials | None, Depends(security)
+    ] = None,
 ) -> str:
-    """                                                                     
-    Smart dependency that looks for the token in the right place            
-    based on the X-Platform header.                                         
-    """                                                                     
-    if platform == "web":                                                   
-        if not cookie_token:                                                
-            raise TokenEmptyError("Missing refresh token in cookies")       
-        return cookie_token                                                 
-                                                                            
-    elif platform == "mobile":                                              
-        if not header_token or not header_token.refresh_token:                  
-            raise TokenEmptyError("Missing refresh token in body")          
-        return header_token.refresh_token                                     
-                                                                            
-    raise InvalidPlatformError(f"Unknown platform: {platform}")   
+    """
+    Smart dependency that looks for the token in the right place
+    based on the X-Platform header.
+    Web -> Cookie
+    Mobile -> Authorization: Bearer <token>
+    """
+    if platform == "web":
+        if not cookie_token:
+            raise TokenEmptyError("Missing refresh token in cookies")
+        return cookie_token
+
+    elif platform == "mobile":
+        if not bearer_token or not bearer_token.credentials:
+            raise TokenEmptyError("Missing refresh token in Authorization header")
+        return bearer_token.credentials
+
+    raise InvalidPlatformError(f"Unknown platform: {platform}")
