@@ -1,6 +1,7 @@
 class AuthError(Exception):
     pass
 
+
 class TierDoesntExist(AuthError):
     """Default user tier not found, cannot register user"""
 

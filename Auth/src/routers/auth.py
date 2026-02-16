@@ -3,12 +3,11 @@ from typing import Union
 from pydantic import SecretStr
 
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.security import OAuth2PasswordRequestFormStrict
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from application import AuthAppService
-from schemas.auth import RequestRegister
+from schemas.auth import RequestRegister, RequestLogin
 
 
 from shared_db import get_session
@@ -52,14 +51,13 @@ async def register(
     operation_id="login_user",
 )
 async def login(
-    form_data: OAuth2PasswordRequestFormStrict = Depends(),
+    form_data: RequestLogin,
     ctx: TokenContext = Depends(),
 ):
     """Function for logging in"""
-    password = SecretStr(form_data.password)
     access_token, refresh_token = await AuthAppService().login_and_issue_tokens(
         username=form_data.username,
-        password=password.get_secret_value()
+        password=form_data.password.get_secret_value()
     )
     return ctx.make_return(access_token, refresh_token)
 
