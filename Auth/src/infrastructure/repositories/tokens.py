@@ -10,8 +10,13 @@ class RefreshTokenRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def get_refresh_token_by_jti(self, jti: str) -> RefreshSession | None:
-        stmt = select(RefreshSession).where(RefreshSession.jti == jti)
+    async def get_refresh_token_by_jti(
+        self, user_id: str, jti: str
+    ) -> RefreshSession | None:
+        stmt = select(RefreshSession).where(
+            RefreshSession.user_id == user_id,
+            RefreshSession.jti == jti,
+        )
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
