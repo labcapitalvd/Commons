@@ -15,12 +15,12 @@ class UserDisabled(AuthError):
 
 
 class TokenError(AuthError):
-    """Token is no longer valid"""
+    """Token has an error"""
 
 
 class TokenRevoked(AuthError):
-    """Token is no longer valid"""
+    """Token has been revoked"""
 
 
-class TokenInvalid(AuthError):
+class TokenExpired(AuthError):
     """Token is no longer valid"""

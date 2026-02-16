@@ -30,11 +30,12 @@ class RefreshTokenRepository:
         """
         stmt = (
             update(RefreshSession)
-            .where(RefreshSession.user_id == user_id, RefreshSession.jti == jti)
+            .where(
+                RefreshSession.user_id == user_id,
+                RefreshSession.jti == jti)
             .values(is_active=False)
         )
-        result = await self.session.execute(stmt)
-        return None
+        await self.session.execute(stmt)
 
     def create_refresh_token(self, token: RefreshSession) -> None:
         session = cast(Session, self.session)

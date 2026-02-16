@@ -8,7 +8,7 @@ from shared_utils.hashing import hash_token, verify_token
 from infrastructure.uow import AuthUoW
 
 from shared_utils import get_logger
-from .errors import TokenRevoked, TokenInvalid
+from .errors import TokenRevoked, TokenExpired, TokenError
 
 
 logger = get_logger(__name__)
@@ -46,11 +46,14 @@ class TokenService:
         user = decoded["sub"]
 
         db_token = await uow.tokens.get_refresh_token_by_jti(user_id=user, jti=jti)
-        if not db_token:
+        if db_token is None:
             logger.warning(
                 "Attempt to use revoked refresh token on reauth: jti=%s", jti
             )
             raise TokenRevoked()
+        
+        if db_token.expires_at < datetime.now(timezone.utc):
+            raise TokenExpired
 
         try:
             verify_token(token=client_refresh_token, hashed_token=db_token.refresh_hash)
@@ -58,9 +61,9 @@ class TokenService:
             logger.warning(
                 "Failed to verify refresh token on reauth: jti=%s, reason=%s", jti, e
             )
-            raise TokenInvalid() from e
+            raise TokenError() from e
 
-        uow.tokens.delete_refresh_token(db_token)
+        uow.tokens.deactivate_refresh_token(user_id=user, jti=jti)
 
         return await self.issue_tokens(
             UUID(decoded["sub"]), decoded["username"], uow=uow
@@ -75,11 +78,11 @@ class TokenService:
         user = decoded["sub"]
 
         db_token = await uow.tokens.get_refresh_token_by_jti(user_id=user, jti=jti)
-        if not db_token:
+        if db_token is None:
             logger.warning(
                 "Attempt to use revoked refresh token on logout: jti=%s", jti
             )
-            raise TokenRevoked()
+            return
 
         try:
             verify_token(token=client_refresh_token, hashed_token=db_token.refresh_hash)
@@ -87,6 +90,6 @@ class TokenService:
             logger.warning(
                 "Failed to verify refresh token on logout: jti=%s, reason=%s", jti, e
             )
-            raise TokenInvalid() from e
+            raise TokenError() from e
 
-        uow.tokens.delete_refresh_token(db_token)
+        uow.tokens.deactivate_refresh_token(user_id=user, jti=jti)
