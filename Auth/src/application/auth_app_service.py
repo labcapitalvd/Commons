@@ -19,9 +19,7 @@ class AuthAppService:
                 username=username, email=email, password=password, uow=uow
             )
 
-    async def login_and_issue_tokens(
-        self, username: str, password: str
-    ) -> tuple[str, str]:
+    async def login(self, username: str, password: str) -> tuple[str, str]:
         async with AuthUoW() as uow:
             user = await self.auth_service.login(
                 username=username, password=password, uow=uow
@@ -31,7 +29,7 @@ class AuthAppService:
             )
             return tokens
 
-    async def reauth_refresh(self, client_refresh_token: str) -> tuple[str, str]:
+    async def reauth(self, client_refresh_token: str) -> tuple[str, str]:
         async with AuthUoW() as uow:
             return await self.token_service.reauth(
                 client_refresh_token=client_refresh_token, uow=uow

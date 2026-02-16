@@ -1,21 +1,12 @@
-from typing import Union
-
-from pydantic import SecretStr
-
 from fastapi import APIRouter, Depends, HTTPException
-
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from application import AuthAppService
 from schemas.auth import RequestRegister, RequestLogin
 
+from domain.services.auth.errors import UserAlreadyExists
 
-from shared_db import get_session
-from shared_schemas import ResponseWeb, ResponseMobile, ResponseMessage
-from shared_utils import TokenContext, get_refresh_token
-
-class UserAlreadyExists(Exception):
-    """Usuario ya existe."""
+from shared_schemas import ResponseAuth, ResponseMessage
+from shared_utils import AuthContext
 
 router = APIRouter(tags=["Autenticación"], prefix="/auth")
 
@@ -45,38 +36,36 @@ async def register(
 
 @router.post(
     "/login",
-    response_model=Union[ResponseWeb, ResponseMobile],
+    response_model=ResponseAuth,
     response_model_exclude_none=True,
     operation_id="login_user",
 )
 async def login(
     form_data: RequestLogin,
-    ctx: TokenContext = Depends(),
+    ctx: AuthContext = Depends(),
 ):
     """Function for logging in"""
-    access_token, refresh_token = await AuthAppService().login_and_issue_tokens(
+    access_token, refresh_token = await AuthAppService().login(
         username=form_data.username,
         password=form_data.password.get_secret_value()
     )
-    return ctx.make_return(access_token, refresh_token)
+    return ctx.make_response(access_token, refresh_token)
 
 
 @router.post(
     "/reauth",
-    response_model=Union[ResponseWeb, ResponseMobile],
+    response_model=ResponseAuth,
     response_model_exclude_none=True,
     operation_id="reauth_user",
 )
 async def refresh_token(
-    refresh_token: str = Depends(get_refresh_token),
-    ctx: TokenContext = Depends(),
-    db: AsyncSession = Depends(get_session),
+    ctx: AuthContext = Depends(),
 ):
     """Function for refreshing token"""
-    tokens = await AuthAppService().reauth_refresh(
-        old_refresh_token=refresh_token
+    new_access, new_refresh = await AuthAppService().reauth(
+        client_refresh_token=ctx.refresh_token
     )
-    return ctx.make_return(*tokens)
+    return ctx.make_response(new_access, new_refresh)
 
 
 @router.post(
@@ -86,12 +75,11 @@ async def refresh_token(
     operation_id="logout_user",
 )
 async def logout(
-    refresh_token: str = Depends(get_refresh_token),
-    ctx: TokenContext = Depends(),
-    db: AsyncSession = Depends(get_session),
+    ctx: AuthContext = Depends(),
 ):
     """Function for logging out"""
     await AuthAppService().logout(
-        refresh_token=refresh_token
+        client_refresh_token=ctx.refresh_token
     )
+    ctx.unset_refresh_cookie()
     return ResponseMessage(message="ok")

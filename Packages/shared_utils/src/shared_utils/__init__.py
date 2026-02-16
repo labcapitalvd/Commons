@@ -3,7 +3,7 @@ from .files import save_file, rename_file, delete_file
 from .hashing import hash_string, hash_password, hash_token
 from .hashing import verify_string, verify_password, verify_token
 from .texts import sanitize_text, sanitize_email 
-from .tokens import TokenContext, get_refresh_token
+from .tokens import AuthContext
 from .tokens import generate_token, decode_token
 from .logger import configure_logging, get_logger
 
@@ -22,8 +22,7 @@ __all__ = [
     "hash_text",
     "sanitize_text",
     "sanitize_email",
-    "TokenContext",
-    "get_refresh_token",
+    "AuthContext",
     "generate_token",
     "decode_token",
     "configure_logging",

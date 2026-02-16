@@ -19,7 +19,7 @@ from joserfc.errors import (
     JoseError,
 )
 
-from shared_schemas import RefreshToken
+from shared_schemas import ResponseAuth
 
 from .config import (
     JWT_EXPIRE_MINUTES_ACCESS,
@@ -131,16 +131,50 @@ def decode_token(token: str, expected_type: TokenType):
         raise TokenDecodeError(f"Error decoding {expected_type} token") from e
 
 
-class TokenContext:
+class AuthContext:
     def __init__(
         self,
+        request: Request,
         response: Response,
         platform: Annotated[str, Header(alias="X-Platform")] = "web",
+        cookie_token: Annotated[str | None, Cookie(alias="refresh_token")] = None,
+        bearer_token: Annotated[
+            HTTPAuthorizationCredentials | None, Depends(security)
+        ] = None,
     ):
+        self.request = request
         self.response = response
         self.platform = platform
+        self.cookie_token = cookie_token
+        self.bearer_token = bearer_token
 
-    def set_refresh_cookie(self, refresh_token: str):
+        if self.platform == "mobile":
+            origin = request.headers.get("origin")
+            referer = request.headers.get("referer")
+            if origin or referer:
+                raise InvalidPlatformError(
+                    "Browsers cannot claim to be mobile to bypass cookie security."
+                )
+
+    @property
+    def refresh_token(self) -> str:
+        """
+        Extracts the refresh token based on the platform.
+        """
+        if self.platform == "web":
+            if not self.cookie_token:
+                raise TokenEmptyError("Missing refresh token in cookies")
+            return self.cookie_token
+
+        elif self.platform == "mobile":
+            # Ideally mobile sends refresh token in body, but if using header:
+            if not self.bearer_token or not self.bearer_token.credentials:
+                raise TokenEmptyError("Missing refresh token in Authorization header")
+            return self.bearer_token.credentials
+
+        raise InvalidPlatformError(f"Unknown platform: {self.platform}")
+
+    def _set_refresh_cookie(self, refresh_token: str):
         if self.platform == "web":
             self.response.set_cookie(
                 key="refresh_token",
@@ -159,30 +193,24 @@ class TokenContext:
                 httponly=True,
                 secure=COOKIES_SECURE,
                 samesite=COOKIES_SAMESITE,
+                path="/auth",
             )
 
-async def get_refresh_token(
-    request: Request,
-    platform: Annotated[str, Header(alias="X-Platform")] = "web",
-    cookie_token: Annotated[str | None, Cookie(alias="refresh_token")] = None,
-    bearer_token: Annotated[
-        HTTPAuthorizationCredentials | None, Depends(security)
-    ] = None,
-) -> str:
-    """
-    Smart dependency that looks for the token in the right place
-    based on the X-Platform header.
-    Web -> Cookie
-    Mobile -> Authorization: Bearer <token>
-    """
-    if platform == "web":
-        if not cookie_token:
-            raise TokenEmptyError("Missing refresh token in cookies")
-        return cookie_token
+    def make_response(self, access_token: str, refresh_token: str) -> ResponseAuth:
+        """
+        Constructs the appropriate response structure and sets cookies if
+        needed.
+        """
+        if self.platform == "web":
+            self._set_refresh_cookie(refresh_token)
+            return ResponseAuth(
+                access_token=access_token,
+                refresh_token=None,
+                message="Auth successful (web)",
+            )
 
-    elif platform == "mobile":
-        if not bearer_token or not bearer_token.credentials:
-            raise TokenEmptyError("Missing refresh token in Authorization header")
-        return bearer_token.credentials
-
-    raise InvalidPlatformError(f"Unknown platform: {platform}")
+        return ResponseAuth(
+            access_token=access_token, 
+            refresh_token=refresh_token,
+            message="Auth successful (mobile)"
+        )

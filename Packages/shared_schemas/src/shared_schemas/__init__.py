@@ -15,8 +15,7 @@ from .auth.auth import (
     Platform,
     AccessToken,
     RefreshToken,
-    ResponseWeb,
-    ResponseMobile,
+    ResponseAuth
 )
 
 from .errors.errors import (
@@ -40,8 +39,7 @@ __all__ = [
     "Platform",
     "AccessToken",
     "RefreshToken",
-    "ResponseWeb",
-    "ResponseMobile",
+    "ResponseAuth",
     # errors
     "CustomError",
     "ItemError",

@@ -1,9 +1,9 @@
-from .tokens import TokenContext
-from .tokens import generate_token, decode_token, get_refresh_token
+from .tokens import AuthContext
+from .tokens import generate_token, decode_token 
 
 
 __all__ = [
-    "TokenContext",
+    "AuthContext",
     "generate_token",
     "decode_token",
     "get_refresh_token",

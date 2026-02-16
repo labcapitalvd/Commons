@@ -51,6 +51,9 @@ class TokenService:
                 "Attempt to use revoked refresh token on reauth: jti=%s", jti
             )
             raise TokenRevoked()
+
+        if not db_token.is_active:
+            raise TokenRevoked()
         
         if db_token.expires_at < datetime.now(timezone.utc):
             raise TokenExpired

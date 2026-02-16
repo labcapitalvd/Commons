@@ -46,15 +46,15 @@ class AuthService:
     ) -> User:
         """Login user."""
         user = await uow.users.get_by_username(username)
-
-        if not user:
-            raise InvalidCredentials("Invalid credentials")
-
         stored_hash = user.password_hash if user else DUMMY_HASH
+        
         try:
             verify_password(password=password, hashed_password=stored_hash)
         except Exception as e:
             raise InvalidCredentials() from e
+
+        if not user:
+            raise InvalidCredentials("Invalid credentials")
 
         return user
 
@@ -66,15 +66,15 @@ class AuthService:
     ) -> User:
         """Delete user."""
         user = await uow.users.get_by_username(username)
-
-        if not user:
-            raise InvalidCredentials("Invalid credentials")
-
         stored_hash = user.password_hash if user else DUMMY_HASH
+        
         try:
             verify_password(password=password, hashed_password=stored_hash)
         except Exception as e:
             raise InvalidCredentials() from e
+
+        if not user:
+            raise InvalidCredentials("Invalid credentials")
 
         uow.users.delete_user(user)
         return user
