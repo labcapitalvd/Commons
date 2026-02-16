@@ -25,4 +25,4 @@ class RefreshSession(Base):
     refresh_hash: Mapped[str] = column_short_text()
     
     expires_at: Mapped[datetime] = column_datetime()
-    revoked: Mapped[bool] = column_bool()
+    is_active: Mapped[bool] = column_bool()

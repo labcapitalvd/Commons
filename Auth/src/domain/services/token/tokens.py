@@ -43,8 +43,9 @@ class TokenService:
         dec = decode_token(client_refresh_token, "refresh")
         decoded = dec.claims
         jti = decoded["jti"]
+        user = decoded["sub"]
 
-        db_token = await uow.tokens.get_refresh_token_by_jti(jti)
+        db_token = await uow.tokens.get_refresh_token_by_jti(user_id=user, jti=jti)
         if not db_token:
             logger.warning(
                 "Attempt to use revoked refresh token on reauth: jti=%s", jti
@@ -71,8 +72,9 @@ class TokenService:
         dec = decode_token(client_refresh_token, "refresh")
         decoded = dec.claims
         jti = decoded["jti"]
+        user = decoded["sub"]
 
-        db_token = await uow.tokens.get_refresh_token_by_jti(jti)
+        db_token = await uow.tokens.get_refresh_token_by_jti(user_id=user, jti=jti)
         if not db_token:
             logger.warning(
                 "Attempt to use revoked refresh token on logout: jti=%s", jti
