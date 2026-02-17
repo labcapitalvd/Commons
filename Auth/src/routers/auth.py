@@ -17,9 +17,7 @@ router = APIRouter(tags=["Autenticación"], prefix="/auth")
     response_model_exclude_none=True,
     operation_id="register_user",
 )
-async def register(
-    form: RequestRegister
-):
+async def register(form: RequestRegister):
     """Function for registering"""
     try:
         await AuthAppService().register(
@@ -31,7 +29,6 @@ async def register(
 
     except UserAlreadyExists:
         raise HTTPException(status_code=400, detail="User already exists")
-
 
 
 @router.post(
@@ -46,8 +43,7 @@ async def login(
 ):
     """Function for logging in"""
     access_token, refresh_token = await AuthAppService().login(
-        username=form_data.username,
-        password=form_data.password.get_secret_value()
+        username=form_data.username, password=form_data.password.get_secret_value()
     )
     return ctx.make_response(access_token, refresh_token)
 
@@ -78,8 +74,6 @@ async def logout(
     ctx: AuthContext = Depends(),
 ):
     """Function for logging out"""
-    await AuthAppService().logout(
-        client_refresh_token=ctx.refresh_token
-    )
+    await AuthAppService().logout(client_refresh_token=ctx.refresh_token)
     ctx.unset_refresh_cookie()
     return ResponseMessage(message="ok")

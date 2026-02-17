@@ -28,12 +28,21 @@ class RequestRegister(Username, UserEmail, UserPassword):
     @field_validator("password")
     @classmethod
     def validate_password(cls, v: SecretStr) -> SecretStr:
-        sanitized = sanitize_text(v.get_secret_value())
-        return SecretStr(sanitized)
+        return v
 
 
 class RequestLogin(Username, UserPassword):
     """Request body for logging in a user."""
+
+    @field_validator("username")
+    @classmethod
+    def validate_username(cls, v: str) -> str:
+        return sanitize_text(v)
+
+    @field_validator("password")
+    @classmethod
+    def validate_password(cls, v: SecretStr) -> SecretStr:
+        return v
 
 
 class RefreshTokenBody(BaseSchema):
