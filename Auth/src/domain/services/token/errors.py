@@ -1,26 +1,14 @@
-class AuthError(Exception):
-    pass
+class TokenError(Exception):
+    """Base error class for token service errors"""
 
 
-class InvalidCredentials(AuthError):
-    """Username or password is incorrect"""
-
-
-class UserAlreadyExists(AuthError):
-    """User already exists"""
-
-
-class UserDisabled(AuthError):
-    """User exists but cannot authenticate"""
-
-
-class TokenError(AuthError):
-    """Token has an error"""
-
-
-class TokenRevoked(AuthError):
+class TokenRevoked(TokenError):
     """Token has been revoked"""
 
 
-class TokenExpired(AuthError):
+class TokenExpired(TokenError):
     """Token is no longer valid"""
+
+
+class TokenMalformed(TokenError):
+    """Token does not contain required claims"""

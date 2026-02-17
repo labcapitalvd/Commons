@@ -1,5 +1,5 @@
 class AuthError(Exception):
-    pass
+    """Base error for auth service errors"""
 
 
 class TierDoesntExist(AuthError):
@@ -13,10 +13,3 @@ class InvalidCredentials(AuthError):
 class UserAlreadyExists(AuthError):
     """User already exists"""
 
-
-class UserDisabled(AuthError):
-    """User exists but cannot authenticate"""
-
-
-class TokenRevoked(AuthError):
-    """Token is no longer valid"""
