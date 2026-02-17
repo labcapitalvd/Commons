@@ -28,16 +28,14 @@ RUN --mount=type=secret,id=github_token_commons \
 ARG CACHEBUST=1
 # Fetch/install each package
 RUN --mount=type=secret,id=github_token_commons \
-    /usr/local/bin/fetch.sh LABCapital-VD/Commons shared_db.zip
-RUN --mount=type=secret,id=github_token_commons \
-    /usr/local/bin/fetch.sh LABCapital-VD/Commons shared_models.zip
-RUN --mount=type=secret,id=github_token_commons \
-    /usr/local/bin/fetch.sh LABCapital-VD/Commons shared_schemas.zip
-RUN --mount=type=secret,id=github_token_commons \
-    /usr/local/bin/fetch.sh LABCapital-VD/Commons shared_utils.zip
+    TOKEN=$(cat /run/secrets/github_token_commons) && \
+    /usr/local/bin/fetch.sh LABCapital-VD/Commons shared_db.zip "$TOKEN" && \
+    /usr/local/bin/fetch.sh LABCapital-VD/Commons shared_models.zip "$TOKEN" && \
+    /usr/local/bin/fetch.sh LABCapital-VD/Commons shared_schemas.zip "$TOKEN" && \
+    /usr/local/bin/fetch.sh LABCapital-VD/Commons shared_utils.zip "$TOKEN"
 
 COPY src/pyproject.toml ./pyproject.toml
-RUN pip install --no-cache-dir -e .
+RUN pip install --no-cache-dir .
 
 # -----------------------------
 # 4. Copy app

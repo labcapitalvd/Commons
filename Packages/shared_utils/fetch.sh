@@ -6,7 +6,22 @@ set -e
 
 GITHUB_REPO="$1"
 FILENAME="$2"
-GITHUB_TOKEN="$(cat /run/secrets/github_token)"
+GITHUB_TOKEN="$3"
+
+if [ -z "$GITHUB_REPO" ]; then
+    echo "❌ Error: No GITHUB_REPO provided."
+    exit 1
+fi
+
+if [ -z "$FILENAME" ]; then
+    echo "❌ Error: No FILENAME provided."
+    exit 1
+fi
+
+if [ -z "$GITHUB_TOKEN" ]; then
+    echo "❌ Error: No GITHUB_TOKEN provided."
+    exit 1
+fi 
 
 echo "Fetching $FILENAME from $GITHUB_REPO..."
 
