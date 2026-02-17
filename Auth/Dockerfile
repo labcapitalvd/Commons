@@ -44,9 +44,7 @@ RUN pip install --no-cache-dir -e .
 # -----------------------------
 COPY src/main.py ./main.py
 COPY src/application ./application
-COPY src/db ./db
 COPY src/domain ./domain
-COPY src/handlers ./handlers
 COPY src/infrastructure ./infrastructure
 COPY src/routers ./routers
 COPY src/schemas ./schemas
