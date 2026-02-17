@@ -32,10 +32,10 @@ from .config import (
 from .errors import (
     TokenEncodeError,
     TokenDecodeError,
-    TokenTypeError,
-    TokenSignatureError,
     TokenExpiredError,
+    TokenSignatureError,
     TokenEmptyError,
+    TokenTypeError,
     InvalidPlatformError,
 )
 
@@ -52,7 +52,7 @@ TokenType = Literal["access", "refresh"]
 
 def generate_token(
     user_id: UUID, username: str, token_type: TokenType = "access"
-) -> tuple[str, int, str | None]:
+) -> tuple[str, int, UUID | None]:
     """
     Generate either an access or refresh token.
     token_type: "access" | "refresh"
@@ -71,8 +71,8 @@ def generate_token(
 
         claims = {
             "sub": str(user_id),
-            "username": username,
-            "token_type": token_type,
+            "username": str(username),
+            "token_type": str(token_type),
             "iat": int(now.timestamp()),
             "exp": int(exp.timestamp()),
         }
@@ -80,10 +80,10 @@ def generate_token(
         jti = None
         if token_type == "refresh":
             jti = str(uuid7())
-            claims["jti"] = jti
+            claims["jti"]:UUID = jti
 
         token = jwt.encode(header, claims, PRIVATE_KEY, registry=REGISTRY)
-        return token, int(exp.timestamp()), jti
+        return token, int(exp.timestamp()), UUID(jti)
 
     except InsecureClaimError as e:
         raise TokenEncodeError("Insecure claim error") from e
