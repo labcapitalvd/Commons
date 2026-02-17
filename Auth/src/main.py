@@ -1,26 +1,21 @@
 import os
-
-from fastapi import FastAPI
-
 from contextlib import asynccontextmanager
 
-from fastapi import Request
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from fastapi.exceptions import RequestValidationError
+from shared_models.relationships import *
+from shared_schemas import (
+    CustomError,
+    ItemError,
+    add_routers_with_custom_errors,
+    custom_error_handler,
+)
+from shared_utils import configure_logging, get_logger
 
 from routers.auth import router as router_auth
 from routers.files import router as router_files
-
-from shared_utils import configure_logging, get_logger
-from shared_models.relationships import * 
-
-from shared_schemas import (
-    ItemError,
-    CustomError,
-    custom_error_handler,
-    add_routers_with_custom_errors,
-)
 
 configure_logging()
 
@@ -119,6 +114,10 @@ Tenga en cuenta que algunos endpoints están protegidos por autenticación y aut
 # MIDDLEWARE
 ##############################################################################################
 
+# TrustedHostMiddleware must be added before CORSMiddleware so that CORS is the outer-most
+# layer and handles OPTIONS requests correctly.
+api_node.add_middleware(TrustedHostMiddleware, allowed_hosts=NODE_ALLOWED_HOSTS)
+
 api_node.add_middleware(
     CORSMiddleware,
     allow_origins=NODE_ORIGINS,
@@ -136,12 +135,6 @@ api_public.add_middleware(
     allow_headers=PUBLIC_HEADERS,
     max_age=86400,
 )
-
-##############################################################################################
-# TrustedHostMiddleware
-##############################################################################################
-
-api_node.add_middleware(TrustedHostMiddleware, allowed_hosts=NODE_ALLOWED_HOSTS)
 
 ##############################################################################################
 # ExceptionHandlerMiddleware
