@@ -14,8 +14,8 @@ else
 fi
 
 (
-cd Auth && docker compose build \
-  --build-arg FETCHER="$FETCHER" "$@" \
-  --build-arg PACKAGES="$PACKAGES" "$@" &&
-  docker push labcapital/apps:Auth
+  cd Auth && docker compose build \
+    --build-arg FETCHER="$FETCHER" "$@" \
+    --build-arg PACKAGES="$PACKAGES" "$@" &&
+    docker push labcapital/apps:Auth
 )
