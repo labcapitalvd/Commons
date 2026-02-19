@@ -13,8 +13,16 @@ else
   PACKAGES=1
 fi
 
+if [[ "$1" == "applications" ]]; then
+  APPLICATIONS=$(date +%s)
+  shift
+else
+  APPLICATIONS=1
+fi
+
 (
   cd Auth && docker compose build \
     --build-arg FETCHER="$FETCHER" "$@" \
-    --build-arg PACKAGES="$PACKAGES" "$@"
+    --build-arg PACKAGES="$PACKAGES" "$@" \
+    --build-arg APPLICATIONS="$APPLICATIONS" "$@"
 )
