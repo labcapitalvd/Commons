@@ -5,9 +5,9 @@ set -e
 
 # 1. Check if a version argument was provided (e.g., ./release.sh v1.2.4)
 if [ -z "$1" ]; then
-    echo "❌ Error: No version provided."
-    echo "Usage: ./release.sh v1.x.x"
-    exit 1
+  echo "❌ Error: No version provided."
+  echo "Usage: ./release.sh v1.x.x"
+  exit 1
 fi
 
 VERSION=$1
@@ -21,24 +21,24 @@ trap 'rm -rf "$TMP_DIR"; echo "🧹 Cleaned up $TMP_DIR"' EXIT
 
 # 3. Create the zips inside the tmp directory
 echo "🗜️  Zipping packages..."
-(cd Packages/shared_db      && zip -rq "$TMP_DIR/shared_db.zip" .)
-(cd Packages/shared_models  && zip -rq "$TMP_DIR/shared_models.zip" .)
+(cd Packages/shared_db && zip -rq "$TMP_DIR/shared_db.zip" .)
+(cd Packages/shared_models && zip -rq "$TMP_DIR/shared_models.zip" .)
 (cd Packages/shared_schemas && zip -rq "$TMP_DIR/shared_schemas.zip" .)
-(cd Packages/shared_utils   && zip -rq "$TMP_DIR/shared_utils.zip" .)
+(cd Packages/shared_utils && zip -rq "$TMP_DIR/shared_utils.zip" .)
 
 # 4. Verification of Token
 if [ -z "$GITHUB_TOKEN_COMMONS" ]; then
-    echo "❌ Error: GITHUB_TOKEN is not set."
-    echo "Make sure you ran 'direnv allow' or have the secret in your env."
-    exit 1
+  echo "❌ Error: GITHUB_TOKEN is not set."
+  echo "Make sure you ran 'direnv allow' or have the secret in your env."
+  exit 1
 fi
 
 # 5. Run ghr to upload to GitHub
 echo "🚀 Uploading $VERSION to GitHub..."
 ghr -t "$GITHUB_TOKEN_COMMONS" \
-    -u LABCapital-VD \
-    -r Commons \
-    -replace \
-    "$VERSION" "$TMP_DIR/"
+  -u LABCapital-VD \
+  -r Commons \
+  -replace \
+  "$VERSION" "$TMP_DIR/"
 
 echo "✅ Release $VERSION successful!"
