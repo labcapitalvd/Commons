@@ -15,8 +15,8 @@ def load_fernet_key() -> bytes:
     with open(FERNET_KEY_FILE, "rb") as f:
         key = f.read().strip()
         if len(key) != 44:
-            logger.critical("Invalid Fernet key length (%d)", len(key))
-            raise RuntimeError("Invalid Fernet key")
+            logger.critical("Invalid Fernet pass length (%d)", len(key))
+            raise RuntimeError("Invalid Fernet pass")
         return key
 
 

@@ -17,14 +17,14 @@ POSTGRES_PASSWORD_FILE = "/run/secrets/postgres_password"
 
 def load_postgres_key() -> bytes:
     if not os.path.exists(POSTGRES_PASSWORD_FILE):
-        logger.critical("Postgress key missing at %s", POSTGRES_PASSWORD_FILE)
-        raise RuntimeError("Fernet key not configured. Mount /run/secrets/fernet_key")
+        logger.critical("Postgress pass missing at %s", POSTGRES_PASSWORD_FILE)
+        raise RuntimeError("Postgress pass not configured. Mount /run/secrets/postgres_password")
 
     with open(POSTGRES_PASSWORD_FILE, "rb") as f:
         key = f.read().strip()
         if len(key) <= 0:
-            logger.critical("Invalid Fernet key length (%d)", len(key))
-            raise RuntimeError("Invalid Fernet key")
+            logger.critical("Invalid Postgress pass length (%d)", len(key))
+            raise RuntimeError("Invalid Postgress pass")
         return key
 
 env_key = os.environ.get("POSTGRES_PASSWORD")
