@@ -5,15 +5,34 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 
+from shared_utils.logger import get_logger
+
+logger = get_logger(__name__)
+
 POSTGRES_USER = os.environ["POSTGRES_USER"]
 POSTGRES_DB = os.environ["POSTGRES_DB"]
 POSTGRES_HOST = os.getenv("POSTGRES_HOST","db")
 POSTGRES_PORT = os.getenv("POSTGRES_PORT","5432")
 POSTGRES_PASSWORD_FILE = "/run/secrets/postgres_password"
-if not os.path.exists(POSTGRES_PASSWORD_FILE):
-    raise FileNotFoundError(f"POSTGRES_PASSWORD_FILE file not found at {POSTGRES_PASSWORD_FILE}")
-with open(POSTGRES_PASSWORD_FILE, "r") as f:
-    POSTGRES_PASSWORD = f.read().strip()
+
+def load_postgres_key() -> bytes:
+    if not os.path.exists(POSTGRES_PASSWORD_FILE):
+        logger.critical("Postgress key missing at %s", POSTGRES_PASSWORD_FILE)
+        raise RuntimeError("Fernet key not configured. Mount /run/secrets/fernet_key")
+
+    with open(POSTGRES_PASSWORD_FILE, "rb") as f:
+        key = f.read().strip()
+        if len(key) <= 0:
+            logger.critical("Invalid Fernet key length (%d)", len(key))
+            raise RuntimeError("Invalid Fernet key")
+        return key
+
+env_key = os.environ.get("POSTGRES_PASSWORD")
+
+if env_key:
+    POSTGRES_PASSWORD: bytes = env_key.encode() if isinstance(env_key, str) else env_key
+else:
+    POSTGRES_PASSWORD: bytes = load_postgres_key()
 
 SYNC_DB = f"postgresql+psycopg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
 ASYNC_DB = f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"

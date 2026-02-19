@@ -20,4 +20,10 @@ def load_fernet_key() -> bytes:
         return key
 
 
-FERNET_KEY: bytes = load_fernet_key()
+env_key = os.environ.get("FERNET_KEY")
+
+if env_key:
+    # Ensure it's converted to bytes if it comes from the environment
+    FERNET_KEY: bytes = env_key.encode() if isinstance(env_key, str) else env_key
+else:
+    FERNET_KEY: bytes = load_fernet_key()
