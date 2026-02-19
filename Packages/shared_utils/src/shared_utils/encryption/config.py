@@ -24,6 +24,8 @@ env_key = os.environ.get("FERNET_PASSWORD")
 
 if env_key:
     # Ensure it's converted to bytes if it comes from the environment
-    FERNET_PASSWORD: bytes = env_key.encode() if isinstance(env_key, str) else env_key
+    ftpass: bytes = env_key.encode() if isinstance(env_key, str) else env_key
 else:
-    FERNET_PASSWORD: bytes = load_fernet_key()
+    ftpass: bytes = load_fernet_key()
+
+FERNET_PASSWORD = ftpass

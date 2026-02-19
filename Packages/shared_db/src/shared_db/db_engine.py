@@ -30,9 +30,11 @@ def load_postgres_key() -> bytes:
 env_key = os.environ.get("POSTGRES_PASSWORD")
 
 if env_key:
-    POSTGRES_PASSWORD: bytes = env_key.encode() if isinstance(env_key, str) else env_key
+    pgpass: bytes = env_key.encode() if isinstance(env_key, str) else env_key
 else:
-    POSTGRES_PASSWORD: bytes = load_postgres_key()
+    pgpass: bytes = load_postgres_key()
+
+POSTGRES_PASSWORD = pgpass
 
 SYNC_DB = f"postgresql+psycopg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
 ASYNC_DB = f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
