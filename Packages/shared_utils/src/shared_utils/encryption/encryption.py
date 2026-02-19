@@ -2,7 +2,7 @@ from cryptography.fernet import Fernet
 
 from shared_utils.logger import get_logger
 
-from .config import FERNET_KEY
+from .config import FERNET_PASSWORD
 from .errors import (
     EncryptionError,
     DecryptionError,
@@ -12,7 +12,7 @@ from .errors import (
 
 
 logger = get_logger(__name__)
-_cipher = Fernet(FERNET_KEY)
+_cipher = Fernet(FERNET_PASSWORD)
 
 
 def encrypt(text: str) -> str:
