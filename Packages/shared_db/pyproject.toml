@@ -7,6 +7,7 @@ dependencies = [
     "asyncpg>=0.30.0",
     "psycopg>=3.2.12",
     "sqlalchemy>=2.0.44",
+    "uuid-utils>=0.14.0",
 ]
 
 [build-system]
