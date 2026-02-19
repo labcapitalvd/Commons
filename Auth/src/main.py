@@ -1,29 +1,14 @@
 import os
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
-from fastapi.exceptions import RequestValidationError
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from shared_models.relationships import *
 from shared_schemas import (
-    CustomError,
-    ItemError,
     add_routers_with_custom_errors,
-    custom_error_handler,
 )
 from shared_utils import configure_logging, get_logger
-
-from domain.services.auth.errors import (
-    AuthError,
-    InvalidCredentials,
-    TierDoesntExist,
-    TokenRevoked,
-    UserAlreadyExists,
-    UserDisabled,
-)
-from domain.services.token.errors import TokenError, TokenExpired
-from utils.files import FileError, FileNameError
 
 from routers.auth import router as router_auth
 from routers.files import router as router_files
