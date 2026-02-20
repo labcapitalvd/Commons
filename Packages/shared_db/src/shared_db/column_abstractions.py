@@ -5,7 +5,7 @@ from decimal import Decimal
 
 from typing import TypeVar, Type, Union
 
-from sqlalchemy import func, ForeignKey
+from sqlalchemy import func, ForeignKey, UUID as UUIDType
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.types import (
     Text,
@@ -18,7 +18,7 @@ from sqlalchemy.types import (
     Enum as PgEnum,
 )
 from sqlalchemy.sql.expression import Function
-from sqlalchemy.dialects.postgresql import JSONB, UUID as UUIDType
+from sqlalchemy.dialects.postgresql import JSONB
 
 TEnum = TypeVar("TEnum", bound=Enum)
 
