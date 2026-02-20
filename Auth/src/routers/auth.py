@@ -6,7 +6,7 @@ from schemas.auth import RequestRegister, RequestLogin
 from domain.services.auth.errors import UserAlreadyExists
 
 from shared_schemas import ResponseAuth, ResponseMessage
-from shared_utils import AuthContext
+from shared_utils import AccessContext, SessionContext
 
 router = APIRouter(tags=["Autenticación"], prefix="/auth")
 
@@ -39,7 +39,7 @@ async def register(form: RequestRegister):
 )
 async def login(
     form_data: RequestLogin,
-    ctx: AuthContext = Depends(),
+    ctx: SessionContext = Depends(),
 ):
     """Function for logging in"""
     access_token, refresh_token = await AuthAppService().login(
@@ -55,7 +55,7 @@ async def login(
     operation_id="reauth_user",
 )
 async def refresh_token(
-    ctx: AuthContext = Depends(),
+    ctx: SessionContext = Depends(),
 ):
     """Function for refreshing token"""
     new_access, new_refresh = await AuthAppService().reauth(
@@ -71,7 +71,7 @@ async def refresh_token(
     operation_id="logout_user",
 )
 async def logout(
-    ctx: AuthContext = Depends(),
+    ctx: SessionContext = Depends(),
 ):
     """Function for logging out"""
     await AuthAppService().logout(client_refresh_token=ctx.refresh_token)

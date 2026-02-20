@@ -80,7 +80,7 @@ def generate_token(
         jti = None
         if token_type == "refresh":
             jti = str(uuid7())
-            claims["jti"]:UUID = jti
+            claims["jti"]: UUID = jti
 
         token = jwt.encode(header, claims, PRIVATE_KEY, registry=REGISTRY)
         return token, int(exp.timestamp()), UUID(jti)
@@ -131,22 +131,49 @@ def decode_token(token: str, expected_type: TokenType):
         raise TokenDecodeError(f"Error decoding {expected_type} token") from e
 
 
-class AuthContext:
+class AccessContext:
     def __init__(
         self,
         request: Request,
         response: Response,
         platform: Annotated[str, Header(alias="X-Platform")] = "web",
-        cookie_token: Annotated[str | None, Cookie(alias="refresh_token")] = None,
-        bearer_token: Annotated[
+        access_token: Annotated[
             HTTPAuthorizationCredentials | None, Depends(security)
         ] = None,
     ):
         self.request = request
         self.response = response
         self.platform = platform
-        self.cookie_token = cookie_token
-        self.bearer_token = bearer_token
+        # Store with a different name to avoid property collision
+        self._raw_token = access_token
+
+        # Your smart browser-spoofing check
+        if self.platform == "mobile" and (
+            request.headers.get("origin") or request.headers.get("referer")
+        ):
+            raise InvalidPlatformError("Browsers cannot claim to be mobile.")
+
+    @property
+    def access_token(self) -> str:
+        if not self._raw_token or not self._raw_token.credentials:
+            raise TokenEmptyError("Missing token in Authorization header")
+        return self._raw_token.credentials
+
+
+class SessionContext:
+    def __init__(
+        self,
+        request: Request,
+        response: Response,
+        platform: Annotated[str, Header(alias="X-Platform")] = "web",
+        cookie_token: Annotated[str | None, Cookie(alias="refresh_token")] = None,
+        header_token: Annotated[str | None, Header(alias="X-Refresh-Token")] = None,
+    ):
+        self.request = request
+        self.response = response
+        self.platform = platform
+        self._cookie_token = cookie_token
+        self._header_token = header_token
 
         if self.platform == "mobile":
             origin = request.headers.get("origin")
@@ -159,18 +186,18 @@ class AuthContext:
     @property
     def refresh_token(self) -> str:
         """
-        Extracts the refresh token based on the platform.
+        Logic-based extraction of the refresh token.
         """
         if self.platform == "web":
-            if not self.cookie_token:
+            if not self._cookie_token:
                 raise TokenEmptyError("Missing refresh token in cookies")
-            return self.cookie_token
+            return self._cookie_token
 
-        elif self.platform == "mobile":
-            # Ideally mobile sends refresh token in body, but if using header:
-            if not self.bearer_token or not self.bearer_token.credentials:
-                raise TokenEmptyError("Missing refresh token in Authorization header")
-            return self.bearer_token.credentials
+        if self.platform == "mobile":
+            if not self._header_token:
+                raise TokenEmptyError("Missing refresh token in X-Refresh-Token header")
+            # No .credentials needed here because it's a custom header string
+            return self._header_token
 
         raise InvalidPlatformError(f"Unknown platform: {self.platform}")
 
@@ -210,7 +237,7 @@ class AuthContext:
             )
 
         return ResponseAuth(
-            access_token=access_token, 
+            access_token=access_token,
             refresh_token=refresh_token,
-            message="Auth successful (mobile)"
+            message="Auth successful (mobile)",
         )

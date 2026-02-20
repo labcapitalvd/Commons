@@ -1,9 +1,10 @@
-from .tokens import AuthContext
+from .tokens import AccessContext, SessionContext
 from .tokens import generate_token, decode_token 
 
 
 __all__ = [
-    "AuthContext",
+    "AccessContext",
+    "SessionContext",
     "generate_token",
     "decode_token",
     "get_refresh_token",
