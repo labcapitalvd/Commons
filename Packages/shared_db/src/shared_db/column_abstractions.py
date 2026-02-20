@@ -3,7 +3,7 @@ from datetime import date, datetime, timezone
 from enum import Enum
 from decimal import Decimal
 
-from typing import TypeVar, Type, Union
+from typing import TypeVar, Type, Union, Callable, TypeAlias
 
 from sqlalchemy import func, ForeignKey, UUID as UUIDType
 from sqlalchemy.orm import Mapped, mapped_column
@@ -21,6 +21,9 @@ from sqlalchemy.sql.expression import Function
 from sqlalchemy.dialects.postgresql import JSONB
 
 TEnum = TypeVar("TEnum", bound=Enum)
+DateTimeType: TypeAlias = Union[datetime, Function, Callable[[], datetime], None]
+DateType: TypeAlias = Union[date, Function, Callable[[], date], None]
+
 
 def column_fk(
     target: str,
@@ -78,12 +81,12 @@ def column_datetime(
     *,
     nullable: bool = False,
     unique: bool = False,
-    default: Union[datetime, Function, None] = None,
-    onupdate: Union[datetime, Function, None] = None,
-    timezone: bool = True,
+    default: DateTimeType = None,
+    onupdate: DateTimeType = None,
+    use_timezone: bool = True,
 ) -> Mapped[datetime]:
     return mapped_column(
-        DateTime(timezone=timezone),
+        DateTime(timezone=use_timezone),
         nullable=nullable,
         unique=unique,
         default=default,
@@ -96,19 +99,38 @@ def column_date(
     *,
     nullable: bool = False,
     unique: bool = False,
-    default: Union[date, Function, None] = func.now(),
-    onupdate=None,
+    default: DateType = None,
+    onupdate: DateType = None,
 ) -> Mapped[date]:
     return mapped_column(
-        Date(), nullable=nullable, unique=unique, default=default, onupdate=onupdate
+        Date(),
+        nullable=nullable,
+        unique=unique,
+        default=default,
+        onupdate=onupdate,
+        server_default=func.current_date() if default is None else None,
     )
+
+
+def column_created_at(
+    *,
+    nullable: bool = False,
+    unique: bool = False,
+    default: DateTimeType = None,
+) -> Mapped[datetime]:
+    return column_datetime(
+        nullable=nullable,
+        unique=unique,
+        default=default,
+    )
+
 
 def column_updated_at(
     *,
     nullable: bool = False,
     unique: bool = False,
-    default: Union[datetime, Function, None] = datetime.now(timezone.utc),
-    onupdate: Union[datetime, Function, None] = datetime.now(timezone.utc),
+    default: DateTimeType = lambda: datetime.now(timezone.utc),
+    onupdate: DateTimeType = lambda: datetime.now(timezone.utc),
 ) -> Mapped[datetime]:
     return column_datetime(
         nullable=nullable, unique=unique, default=default, onupdate=onupdate
@@ -119,8 +141,8 @@ def column_deleted_at(
     *,
     nullable: bool = True,
     unique: bool = False,
-    default: Union[datetime, Function, None] = datetime.now(timezone.utc),
-    onupdate: Union[datetime, Function, None] = None,
+    default: DateTimeType = None,
+    onupdate: DateTimeType = None,
 ) -> Mapped[datetime]:
     return column_datetime(
         nullable=nullable, unique=unique, default=default, onupdate=onupdate
@@ -169,5 +191,3 @@ def column_jsonb(
     return mapped_column(
         JSONB, nullable=nullable, unique=unique, default=default or dict
     )
-
-
