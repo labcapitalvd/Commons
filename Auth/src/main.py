@@ -152,7 +152,7 @@ logger.info(f"Node app allow_credentials: {COOKIES_SECURE}")
 # Montaje de frontend en la aplicación principal
 ##############################################################################################
 
-api.mount("/node", api_private)
+api.mount("/private", api_private)
 api.mount("/public", api_public)
 
 ##############################################################################################
