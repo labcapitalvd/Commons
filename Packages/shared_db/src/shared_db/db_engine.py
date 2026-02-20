@@ -30,9 +30,9 @@ def load_postgres_key() -> str:
 
 POSTGRES_PASSWORD = os.environ.get("POSTGRES_PASSWORD") or load_postgres_key()
 
-print(f"""
+logger.debug(f"""
 user:{POSTGRES_USER}
-pass:{POSTGRES_PASSWORD}
+pass:{'*' * len(str(POSTGRES_PASSWORD))}
 host:{POSTGRES_HOST}
 port:{POSTGRES_PORT}
 db:  {POSTGRES_DB}""")
