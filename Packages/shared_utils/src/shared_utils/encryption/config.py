@@ -1,3 +1,4 @@
+import webencodings
 import os
 
 from shared_utils.logger import get_logger
@@ -10,7 +11,9 @@ FERNET_KEY_FILE = "/run/secrets/fernet_password"
 def load_fernet_key() -> bytes:
     if not os.path.exists(FERNET_KEY_FILE):
         logger.critical("Fernet key missing at %s", FERNET_KEY_FILE)
-        raise RuntimeError("Fernet key not configured. Mount /run/secrets/fernet_password")
+        raise RuntimeError(
+            "Fernet key not configured. Mount /run/secrets/fernet_password"
+        )
 
     with open(FERNET_KEY_FILE, "rb") as f:
         key = f.read().strip()
@@ -19,13 +22,13 @@ def load_fernet_key() -> bytes:
             raise RuntimeError("Invalid Fernet pass")
         return key
 
-
 env_key = os.environ.get("FERNET_PASSWORD")
 
+# Ensure FERNET_PASSWORD is always bytes
 if env_key:
-    # Ensure it's converted to bytes if it comes from the environment
-    ftpass: bytes = env_key.encode() if isinstance(env_key, str) else env_key
+    ft_pass = env_key.encode()
 else:
-    ftpass: bytes = load_fernet_key()
+    ft_pass = load_fernet_key()
 
-FERNET_PASSWORD = ftpass
+FERNET_PASSWORD = ft_pass
+

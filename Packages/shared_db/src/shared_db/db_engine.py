@@ -1,3 +1,4 @@
+from shared_utils import encrypt
 import os
 from typing import AsyncGenerator, Dict, Callable
 
@@ -15,28 +16,21 @@ POSTGRES_HOST = os.getenv("POSTGRES_HOST","db")
 POSTGRES_PORT = os.getenv("POSTGRES_PORT","5432")
 POSTGRES_PASSWORD_FILE = "/run/secrets/postgres_password"
 
-def load_postgres_key() -> bytes:
+def load_postgres_key() -> str:
     if not os.path.exists(POSTGRES_PASSWORD_FILE):
         logger.critical("Postgress pass missing at %s", POSTGRES_PASSWORD_FILE)
         raise RuntimeError("Postgress pass not configured. Mount /run/secrets/postgres_password")
 
-    with open(POSTGRES_PASSWORD_FILE, "rb") as f:
+    with open(POSTGRES_PASSWORD_FILE, "r", encoding="utf-8") as f:
         key = f.read().strip()
         if len(key) <= 0:
             logger.critical("Invalid Postgress pass length (%d)", len(key))
             raise RuntimeError("Invalid Postgress pass")
         return key
 
-env_key = os.environ.get("POSTGRES_PASSWORD")
+POSTGRES_PASSWORD = os.environ.get("POSTGRES_PASSWORD") or load_postgres_key()
 
-if env_key:
-    pgpass: bytes = env_key.encode() if isinstance(env_key, str) else env_key
-else:
-    pgpass: bytes = load_postgres_key()
-
-POSTGRES_PASSWORD = pgpass
-
-logger.debug(f"""
+print(f"""
 user:{POSTGRES_USER}
 pass:{POSTGRES_PASSWORD}
 host:{POSTGRES_HOST}
