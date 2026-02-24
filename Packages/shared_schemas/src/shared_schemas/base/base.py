@@ -25,7 +25,7 @@ class UuidSchema(BaseSchema):
     id: UUID = Field(
         ...,
         title="UUID del objeto.",
-        description="el UUID en v4 o v7 de un objeto en la db"
+        description="el UUID en v4 o v7 de un objeto en la db",
     )
 
 
@@ -33,12 +33,26 @@ class UuidSchema(BaseSchema):
 # Message
 ##############################################################################################
 class ResponseMessage(BaseSchema):
-    """Modelo para representar un mensaje de respuesta."""
+    """Modelo para representar un mensaje de respuesta estandarizado."""
 
+    status: str = Field(
+        "success",
+        min_length=1,
+        max_length=256,
+        title="Status desde la API.",
+        description="Estado de la respuesta (success/error)",
+    )
+    code: str = Field(
+        "OK",
+        min_length=1,
+        max_length=100,
+        title="Código desde la API.",
+        description="Código de negocio (ej: USER_CREATED, LOGOUT_OK)",
+    )
     message: str = Field(
         ...,
         min_length=1,
         max_length=256,
-        title="Mensaje de API.",
-        description="Un mensaje personalizable de la API.",
+        title="Mensaje desde la API.",
+        description="Mensaje legible para el usuario",
     )

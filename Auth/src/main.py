@@ -115,7 +115,6 @@ Tenga en cuenta que algunos endpoints están protegidos por autenticación y aut
 ##############################################################################################
 # MIDDLEWARE
 ##############################################################################################
-@api.exception_handler(BaseDomainError)
 async def domain_exception_handler(request: Request, exc: BaseDomainError):
     """
     Global handler for all business logic errors.
@@ -124,8 +123,11 @@ async def domain_exception_handler(request: Request, exc: BaseDomainError):
     return JSONResponse(
         status_code=exc.status_code,
         content={
-            "error_code": type(exc).__name__,
-            "detail": exc.message,
+            "status": "error",
+            "code": type(
+                exc
+            ).__name__,  # Returns "UserAlreadyExists", "TokenExpired", etc.
+            "message": exc.message,
         },
     )
 

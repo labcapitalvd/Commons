@@ -19,16 +19,13 @@ router = APIRouter(tags=["Autenticación"], prefix="/auth")
 )
 async def register(form: RequestRegister):
     """Function for registering"""
-    try:
-        await AuthAppService().register(
-            form.username,
-            form.email,
-            form.password.get_secret_value(),
-        )
-        return ResponseMessage(message="correct")
+    await AuthAppService().register(
+        form.username,
+        form.email,
+        form.password.get_secret_value(),
+    )
+    return ResponseMessage(message="ok")
 
-    except UserAlreadyExists:
-        raise HTTPException(status_code=400, detail="User already exists")
 
 
 @router.post(
