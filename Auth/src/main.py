@@ -1,14 +1,12 @@
 import os
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from fastapi.responses import JSONResponse
 from shared_models.relationships import *
-from shared_schemas import (
-    add_routers_with_custom_errors,
-)
-from shared_utils import configure_logging, get_logger
+from shared_utils import BaseDomainError, configure_logging, get_logger
 
 from routers.auth import router as router_auth
 from routers.files import router as router_files
@@ -112,6 +110,25 @@ Tenga en cuenta que algunos endpoints están protegidos por autenticación y aut
         },
     ],
 )
+
+
+##############################################################################################
+# MIDDLEWARE
+##############################################################################################
+@api.exception_handler(BaseDomainError)
+async def domain_exception_handler(request: Request, exc: BaseDomainError):
+    """
+    Global handler for all business logic errors.
+    Automatically picks up status_code and message from your classes.
+    """
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "error_code": type(exc).__name__,
+            "detail": exc.message,
+        },
+    )
+
 
 ##############################################################################################
 # MIDDLEWARE

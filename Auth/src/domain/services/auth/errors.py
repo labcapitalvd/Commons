@@ -1,15 +1,28 @@
-class AuthError(Exception):
-    """Base error for auth service errors"""
+from shared_utils import BaseDomainError
+
+
+class AuthError(BaseDomainError):
+    """Base error for auth service errors."""
+
+    status_code = 401
+    message = "Authentication error."
 
 
 class TierDoesntExist(AuthError):
-    """Default user tier not found, cannot register user"""
+    """System configuration error."""
+
+    status_code = 500
+    message = "Default user tier not found, cannot register user."
 
 
 class InvalidCredentials(AuthError):
-    """Username or password is incorrect"""
+    """Received invalid credentials."""
+
+    message = "Username or password is incorrect."
 
 
 class UserAlreadyExists(AuthError):
-    """User already exists"""
+    """User already exists."""
 
+    status_code = 400
+    message = "User already exists."

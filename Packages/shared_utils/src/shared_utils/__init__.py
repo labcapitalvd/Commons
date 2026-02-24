@@ -1,4 +1,5 @@
 from .encryption import encrypt, decrypt
+from .error_handling import BaseDomainError
 from .files import save_file, rename_file, delete_file
 from .hashing import hash_string, hash_password, hash_token
 from .hashing import verify_string, verify_password, verify_token
@@ -10,6 +11,7 @@ from .logger import configure_logging, get_logger
 __all__ = [
     "encrypt",
     "decrypt",
+    "BaseDomainError",
     "save_file",
     "rename_file",
     "delete_file",
