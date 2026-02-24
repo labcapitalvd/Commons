@@ -124,9 +124,7 @@ async def domain_exception_handler(request: Request, exc: BaseDomainError):
         status_code=exc.status_code,
         content={
             "status": "error",
-            "code": type(
-                exc
-            ).__name__,  # Returns "UserAlreadyExists", "TokenExpired", etc.
+            "code": type(exc).__name__,
             "message": exc.message,
         },
     )
