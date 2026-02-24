@@ -130,6 +130,20 @@ async def domain_exception_handler(request: Request, exc: BaseDomainError):
     )
 
 
+@api.exception_handler(Exception)
+async def universal_exception_handler(request: Request, exc: Exception):
+    # Log the full traceback so you can fix the bug later
+    logger.error(f"Unhandled error: {str(exc)}", exc_info=True)
+
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error_code": "InternalServerError",
+            "detail": "An unexpected error occurred. Our team has been notified.",
+        },
+    )
+
+
 ##############################################################################################
 # MIDDLEWARE
 ##############################################################################################
