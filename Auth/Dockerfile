@@ -19,7 +19,7 @@ RUN --mount=type=secret,id=github_token_commons \
     export GITHUB_TOKEN_COMMONS=$(cat /run/secrets/github_token_commons) && \
     curl -L -H "Authorization: token ${GITHUB_TOKEN_COMMONS}" \
     -H "Accept: application/vnd.github.v3.raw" \
-    "https://api.github.com/repos/LABCapital-VD/Commons/contents/Packages/shared_utils/fetch.sh?ref=main" \
+    "https://api.github.com/repos/SpanishSyntax/Commons/contents/Packages/shared_utils/fetch.sh?ref=main" \
     -o /usr/local/bin/fetch.sh && \
     chmod +x /usr/local/bin/fetch.sh
 
@@ -29,10 +29,10 @@ RUN --mount=type=secret,id=github_token_commons \
 ARG PACKAGES=1
 RUN --mount=type=secret,id=github_token_commons \
     TOKEN=$(cat /run/secrets/github_token_commons) && \
-    /usr/local/bin/fetch.sh LABCapital-VD/Commons shared_db.zip "$TOKEN" && \
-    /usr/local/bin/fetch.sh LABCapital-VD/Commons shared_models.zip "$TOKEN" && \
-    /usr/local/bin/fetch.sh LABCapital-VD/Commons shared_schemas.zip "$TOKEN" && \
-    /usr/local/bin/fetch.sh LABCapital-VD/Commons shared_utils.zip "$TOKEN"
+    /usr/local/bin/fetch.sh SpanishSyntax/Commons shared_db.zip "$TOKEN" && \
+    /usr/local/bin/fetch.sh SpanishSyntax/Commons shared_models.zip "$TOKEN" && \
+    /usr/local/bin/fetch.sh SpanishSyntax/Commons shared_schemas.zip "$TOKEN" && \
+    /usr/local/bin/fetch.sh SpanishSyntax/Commons shared_utils.zip "$TOKEN"
 
 COPY src/pyproject.toml ./pyproject.toml
 RUN pip install --no-cache-dir .
