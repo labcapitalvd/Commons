@@ -2,7 +2,7 @@
 set -e
 
 # Usage: fetch.sh <github_repo> <filename>
-# Example: ./fetch.sh SpanishSyntax/Commons shared_db.zip
+# Example: ./fetch.sh LABCapital-VD/Commons shared_db.zip
 
 GITHUB_REPO="$1"
 FILENAME="$2"

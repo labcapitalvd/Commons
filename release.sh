@@ -36,7 +36,7 @@ fi
 # 5. Run ghr to upload to GitHub
 echo "🚀 Uploading $VERSION to GitHub..."
 ghr -t "$GITHUB_TOKEN_COMMONS" \
-  -u SpanishSyntax \
+  -u LABCapital-VD \
   -r Commons \
   -replace \
   "$VERSION" "$TMP_DIR/"
