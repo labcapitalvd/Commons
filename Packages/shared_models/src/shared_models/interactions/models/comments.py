@@ -13,8 +13,7 @@ from shared_db import (
     column_short_text,
 )
 
-from ...targets import TargetTable
-
+from ...targets import CoreTargetTable as TargetTable
 
 class Comment(Base):
     __tablename__ = TargetTable.COMMENTS.table

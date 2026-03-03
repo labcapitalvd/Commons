@@ -13,8 +13,7 @@ from shared_db import (
     column_decimal,
 )
 
-from ...targets import TargetTable
-
+from ...targets import CoreTargetTable as TargetTable
 
 class File(Base):
     __tablename__ = TargetTable.FILES.table

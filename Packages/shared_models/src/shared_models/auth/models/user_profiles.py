@@ -10,8 +10,7 @@ from shared_db import (
     column_fk,
 )
 
-from ...targets import TargetTable
-
+from ...targets import CoreTargetTable as TargetTable
 
 class UserProfile(Base):
     __tablename__ = TargetTable.USER_PROFILES.table

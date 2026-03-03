@@ -13,8 +13,7 @@ from shared_db import (
     column_updated_at,
 )
 
-from ...targets import TargetTable
-
+from ...targets import CoreTargetTable as TargetTable
 
 class User(Base):
     __tablename__ = TargetTable.USERS.table
