@@ -39,8 +39,8 @@ class FileRepository:
         result = await self.session.execute(stmt)
         return result.scalars().all()
 
-    async def add_file(self, file: File) -> None:
-        self.session.add(file)
+    async def add_file(self, entry: File) -> None:
+        self.session.add(entry)
 
-    async def delete_file(self, file: File) -> None:
-        await self.session.delete(file)
+    async def delete_file(self, entry: File) -> None:
+        await self.session.delete(entry)

@@ -16,7 +16,7 @@ from .column_abstractions import (
     column_slug,
     column_jsonb,
 )
-from .base_table import Base, BaseTargetTable, merge_enums
+from .base_table import Base, TableInfo 
 
 from .db_engine import (
     sync_engine,
@@ -47,8 +47,7 @@ __all__ = [
     "column_jsonb",
     # base_table
     "Base",
-    "BaseTargetTable",
-    "merge_enums",
+    "TableInfo",
     # db_engine
     "sync_engine",
     "async_engine",
