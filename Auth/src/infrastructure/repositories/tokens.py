@@ -37,10 +37,10 @@ class RefreshTokenRepository:
         )
         await self.session.execute(stmt)
 
-    def create_refresh_token(self, token: RefreshSession) -> None:
+    def create_refresh_token(self, entry: RefreshSession) -> None:
         session = cast(Session, self.session)
-        session.add(token)
+        session.add(entry)
 
-    def delete_refresh_token(self, token: RefreshSession) -> None:
+    def delete_refresh_token(self, entry: RefreshSession) -> None:
         session = cast(Session, self.session)
-        session.delete(token)
+        session.delete(entry)

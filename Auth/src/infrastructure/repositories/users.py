@@ -26,10 +26,10 @@ class UserRepository:
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
-    def add_user(self, user: User) -> None:
+    def add_user(self, entry: User) -> None:
         session = cast(Session, self.session)
-        session.add(user)
+        session.add(entry)
 
-    def delete_user(self, user: User) -> None:
+    def delete_user(self, entry: User) -> None:
         session = cast(Session, self.session)
-        session.delete(user)
+        session.delete(entry)
