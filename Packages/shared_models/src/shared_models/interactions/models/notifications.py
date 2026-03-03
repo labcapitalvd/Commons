@@ -12,8 +12,7 @@ from shared_db import (
     column_bool,
 )
 
-from ...targets import TargetTable
-
+from ...targets import CoreTargetTable as TargetTable
 
 class Notification(Base):
     __tablename__ = TargetTable.NOTIFICATIONS.table
